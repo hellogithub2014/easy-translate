@@ -1,6 +1,10 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import mutations from './mutations';
+import actions from './actions';
+import getters from './getters';
+
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
@@ -26,18 +30,18 @@ const store = new Vuex.Store({
         number: '当前是: {current} , 转换为百分比是: {current, number, percent}',
         time: '当前时间: {current, time, short}',
       },
-      fromLocale: 'zh',
-      toLocale: 'en',
     },
+    availableLocales: {
+      zh: 'zh',
+      en: 'en',
+      ja: 'ja',
+    },
+    fromLocale: 'zh',
+    toLocale: 'en',
   },
-  getters: {
-    messages(state) {
-      return state.messages;
-    },
-    getTextByPath(state, messages) {
-      return (locale, path) => messages[locale][path];
-    },
-  },
+  getters,
+  mutations,
+  actions,
 });
 
 export default store;

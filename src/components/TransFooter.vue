@@ -1,12 +1,12 @@
 <template>
   <div>
-    this is nav header.  用于切换locale
+    this is footer;
   </div>
 </template>
 
 <script>
 export default {
-  name: 'nav-header',
+  name: 'trans-footer',
 };
 </script>
 

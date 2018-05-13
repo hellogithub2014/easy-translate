@@ -1,21 +1,27 @@
 <template>
   <div>
-    <nav-header></nav-header>
-    <trans-list></trans-list>
-    <nav-footer></nav-footer>
+    <el-header>
+      <trans-header></trans-header>
+    </el-header>
+    <el-main>
+      <trans-list></trans-list>
+    </el-main>
+    <el-footer>
+      <trans-footer></trans-footer>
+    </el-footer>
   </div>
 </template>
 
 <script>
-import NavHeader from '../components/NavHeader';
-import NavFooter from '../components/NavFooter';
+import TransHeader from '../components/TransHeader';
+import TransFooter from '../components/TransFooter';
 import TransList from '../components/TransList';
 
 export default {
   components: {
-    NavHeader,
+    TransHeader,
     TransList,
-    NavFooter,
+    TransFooter,
   },
 };
 </script>

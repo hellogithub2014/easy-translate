@@ -4,7 +4,6 @@
     <el-row :gutter="20">
       <el-col :span="10" >
         <div class="grid-content bg-purple">
-          <!-- <el-input  type="textarea" autosize v-model="fromText"></el-input> -->
           <p style="margin: 0;">{{fromText}}</p>
         </div>
       </el-col>
@@ -13,9 +12,10 @@
           <div>
             <variable-tool @confirm="addVariable"></variable-tool>
             <plural-tool @confirm="addPlural"></plural-tool>
-            <select-tool @confirm="addSelect"></select-tool>
+            <!-- 暂时不添加多选一 -->
+            <!-- <select-tool @confirm="addSelect"></select-tool> -->
           </div>
-          <el-input  type="textarea" autosize v-model="toText"></el-input>
+          <el-input  type="textarea" autosize :value="toText" @change="updateToText"></el-input>
         </div>
       </el-col>
       <el-col :span="4">
@@ -28,66 +28,30 @@
       </el-col>
     </el-row>
 
-    <!-- TODO: 预览功能抽取公共组件 -->
     <!-- 预览 -->
-    <div v-show='showPreview'>
-      <!-- 参数区域 -->
-      <el-row v-for="(param,index) in previewParamList" :key="index" :gutter="20">
-        <el-col :span="10">
-          字段名:
-          <el-input
-            :value="param.key"
-            @change="updateParamKey(index,$event)"
-            clearable
-          ></el-input>
-        </el-col>
-        <el-col :span="10">
-          字段值:
-          <el-input
-            :value="param.value"
-            @change="updateParamValue(index,$event)"
-            clearable
-          ></el-input>
-        </el-col>
-      </el-row>
-
-      <!-- 按钮 -->
-      <el-row>
-        <el-button type="info" @click="addParam">添加参数</el-button>
-        <el-button type="success" @click="format">翻译</el-button>
-      </el-row>
-
-      <!-- 预览结果 -->
-      <el-row>
-        <el-col :span="10" >
-          <div class="grid-content bg-purple preview-result">
-            {{formattedFromText}}
-          </div>
-        </el-col>
-        <el-col :span="10">
-          <div class="grid-content bg-purple-light preview-result">
-            {{formattedToText}}
-          </div>
-        </el-col>
-      </el-row>
-    </div>
+    <trans-item-preview
+      v-show="showPreview"
+      :fromText="fromText"
+      :toText="toText"
+    ></trans-item-preview>
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapMutations } from 'vuex';
 
-import MessageFormat from 'messageformat';
 import PluralTool from './PluralTool';
-import SelectTool from './SelectTool';
 import VariableTool from './VariableTool';
+import TransItemPreview from './TransItemPreview';
+
+import TYPES from '../store/mutation-types';
 
 export default {
   name: 'trans-item',
   components: {
     PluralTool,
-    SelectTool,
     VariableTool,
+    TransItemPreview,
   },
   props: {
     path: {
@@ -98,9 +62,6 @@ export default {
   data() {
     return {
       showPreview: false,
-      previewParamList: [],
-      formattedFromText: this.fromText,
-      formattedToText: this.toText,
     };
   },
   computed: {
@@ -117,56 +78,56 @@ export default {
     },
   },
   methods: {
+    ...mapMutations({
+      updateText: TYPES.UPDATE_TEXT,
+    }),
+
     togglePreview() {
       this.showPreview = !this.showPreview;
     },
-    addParam() {
-      this.previewParamList.push({
-        key: '',
-        value: '',
-      });
-    },
-    updateParamKey(index, newKey) {
-      const list = this.previewParamList;
-      list.splice(index, 1, {
-        ...list[index],
-        key: newKey,
-      });
-    },
-    updateParamValue(index, newVal) {
-      const list = this.previewParamList;
-      list.splice(index, 1, {
-        ...list[index],
-        value: newVal,
-      });
-    },
-    /**  TODO: 在无法转换时提示报错信息;  TODO: 使用新版的MessageFormat */
-    getFormattedResult(locale, text) {
-      const mf = new MessageFormat(locale);
-      mf.setIntlSupport(true);
 
-      const message = mf.compile(text, locale);
-      const o = this.previewParamList.reduce((total, cur) => {
-        if (cur.key.trim()) {
-          // eslint-disable-next-line
-          total[cur.key] = cur.value;
-        }
-        return total;
-      }, {});
-      return message(o);
-    },
-    format() {
-      this.formattedFromText = this.getFormattedResult(this.fromLocale, this.fromText);
-      this.formattedToText = this.getFormattedResult(this.toLocale, this.toText);
-    },
     checkFormat() {
-      // TODO:
+      // TODO:  检查词条文本格式
     },
+
+    /** 翻译文本中追加插值  */
     addVariable({ variableName }) {
-      this.toText += `{${variableName}}`;
+      const newText = `${this.toText}{${variableName}}`;
+
+      this.updateText({
+        locale: this.toLocale,
+        newText,
+        path: this.path,
+      });
     },
-    addPlural() {},
-    addSelect() {},
+
+    /** 翻译文本中追加单复数  */
+    addPlural({ plural, zero, one, other }) {
+      let addedText = `{${plural}, plural, `;
+
+      addedText += `=0{${zero}} `;
+
+      if (one.trim()) {
+        addedText += `one{${one}} `;
+      }
+
+      addedText += `other{${other}}}`;
+
+      this.updateText({
+        locale: this.toLocale,
+        newText: this.toText + addedText,
+        path: this.path,
+      });
+    },
+
+    /** 更改store中的目标翻译文本  */
+    updateToText(newText) {
+      this.updateText({
+        locale: this.toLocale,
+        newText,
+        path: this.path,
+      });
+    },
   },
 };
 </script>
@@ -179,9 +140,6 @@ export default {
   margin: 20px 0;
 }
 .trans-item {
-  /* background-color: rgba(200, 200, 200, 0.3); */
-}
-.preview-result {
-  color: #96e06e;
+  background-color: rgba(200, 200, 200, 0.3);
 }
 </style>

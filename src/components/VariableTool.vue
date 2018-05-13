@@ -6,9 +6,9 @@
       :visible.sync="showDialog"
       width="30%"
     >
-      <el-form :model="form" :inline="true">
+      <el-form ref="variableForm" :model="formModel"  :inline="true">
         <el-form-item label="插值字段名:">
-          <el-input v-model="form.variableName" auto-complete="off"></el-input>
+          <el-input v-model="formModel.variableName" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="showDialog-footer">
@@ -25,15 +25,20 @@ export default {
   data() {
     return {
       showDialog: false,
-      form: {
+      formModel: {
         variableName: '',
       },
     };
   },
   methods: {
     confirm() {
+      const variableForm = this.$refs.variableForm;
+      const { variableName } = this.formModel;
+
       this.showDialog = false;
-      const { variableName } = this.form;
+      this.formModel.variableName = ''; // 重置
+      variableForm.resetFields();
+
       if (variableName.trim()) {
         this.$emit('confirm', { variableName });
       }
