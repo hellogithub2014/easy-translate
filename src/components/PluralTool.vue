@@ -10,11 +10,12 @@
         <el-form-item label="字段名(必填):">
           <el-input v-model="formModel.plural" auto-complete="off" required></el-input>
         </el-form-item>
+        <!-- other是必须滴。 中文环境下，不需要one的选项，因为one和other显示时没有区别.
+          不同环境下使用不用plural参见：http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html -->
         <el-form-item label="值为0时显示:">
           <el-input v-model="formModel.zero" auto-complete="off"></el-input>
         </el-form-item>
-        <!-- TODO: 中文、日文下此项隐藏 -->
-        <el-form-item :label="labelOfPluralOne">
+        <el-form-item :label="labelOfPluralOne" v-show="showPluralOne">
           <el-input v-model="formModel.one" auto-complete="off"></el-input>
         </el-form-item>
         <!-- 必选 -->
@@ -49,13 +50,18 @@ export default {
   },
   computed: {
     ...mapState({
+      availableLocales: 'availableLocales',
       toLocale: 'toLocale',
     }),
     labelOfPluralOne() {
       const prefix = '值为1时显示';
       const suffix = ':';
       const tips = '(可选)';
-      return prefix + (this.toLocale !== 'zh' ? tips : '') + suffix;
+      return prefix + (this.toLocale !== this.availableLocales.zh ? tips : '') + suffix;
+    },
+    showPluralOne() {
+      // 只在英文下显示,中文、日文下没有此项
+      return this.toLocale === this.availableLocales.en;
     },
   },
   methods: {

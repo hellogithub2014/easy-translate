@@ -1,0 +1,9 @@
+{
+  "greet": "hello world",
+  "variables": "my name is {name}, my age is {age}",
+  "plural": "You have {n, plural, =0{no messages} one{ 1 message}  other{# messages}}.",
+  "selectordinal": "You are {POS, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}",
+  "select": "{gender, select, male{He} female{She} other{They}} liked this.",
+  "number": "current is: {current}, percent is: {current, number, percent}",
+  "time": "Current Time: {current, time, short}"
+}

@@ -20,11 +20,6 @@ export default {
   },
   [TYPES.ADD_ENTRY](state, { locale, path, text }) {
     const localeMessage = state.messages[locale];
-    // _.set(localeMessage, path, text);
-    // state.messages[locale] = {
-    //   ...localeMessage,
-    //   [path]: text,
-    // };
     setPathValue(localeMessage, path, text);
   },
 };

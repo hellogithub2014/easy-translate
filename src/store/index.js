@@ -10,26 +10,8 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     messages: {
-      en: {
-        greet: 'hello world',
-        variables: 'my name is {name}, my age is {age}',
-        plural: 'You have {n, plural, =0{no messages} one{1 message}  other{# messages} }.', // other是必须滴
-        selectordinal: 'You are {POS, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}',
-        select: '{gender, select, male{He} female{She} other{They}} liked this.',
-        number: 'current is: {current} , percent is: {current, number, percent}',
-        time: 'Current Time: {current, time, short}',
-      },
-      zh: {
-        greet: '你好',
-        variables: '姓名： {name}, 年龄： {age}',
-        // other是必须滴。 中文环境下，不需要one的选项，因为one和other显示时没有区别.
-        // 不同环境下使用不用plural参见：http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html
-        plural: '你 {n, plural, =0{没有消息}  other{# 条消息} } 未读.',
-        selectordinal: '你是 {POS, selectordinal, other{第 #}} 名',
-        select: '{gender, select, male{他} female{她} other{他们}} 喜欢这样.',
-        number: '当前是: {current} , 转换为百分比是: {current, number, percent}',
-        time: '当前时间: {current, time, short}',
-      },
+      en: {},
+      zh: {},
     },
     availableLocales: {
       zh: 'zh',
@@ -43,5 +25,26 @@ const store = new Vuex.Store({
   mutations,
   actions,
 });
+
+// 获取英文词包， TODO: 去除mock接口
+const fetchEN = fetch('http://www.mocky.io/v2/5af8ec1f320000971086af3c').then((resp) => {
+  if (!resp.ok) {
+    return Promise.reject('fetch en failed');
+  }
+  return resp.json();
+});
+// 获取中文词包， TODO: 去除mock接口
+const fetchZH = fetch('http://www.mocky.io/v2/5af8ec81320000151186af3d').then((resp) => {
+  if (!resp.ok) {
+    return Promise.reject('fetch zh.json failed');
+  }
+  return resp.json();
+});
+Promise.all([fetchEN, fetchZH])
+  .then(([en, zh]) => {
+    store.state.messages.en = { ...en };
+    store.state.messages.zh = { ...zh };
+  })
+  .catch(console.error); // eslint-disable-line
 
 export default store;

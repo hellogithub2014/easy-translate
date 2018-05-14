@@ -1,0 +1,9 @@
+{
+  "greet": "你好",
+  "variables": "姓名： {name}, 年龄： {age}",
+  "plural": "你 {n, plural, =0{没有消息}  other{# 条消息}} 未读.",
+  "selectordinal": "你是 {POS, selectordinal, other{第 #}} 名",
+  "select": "{gender, select, male{他} female{她} other{他们}} 喜欢这样.",
+  "number": "当前是: {current}, 转换为百分比是: {current, number, percent}",
+  "time": "当前时间: {current, time, short}"
+}

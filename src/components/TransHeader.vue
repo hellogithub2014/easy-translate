@@ -3,12 +3,10 @@
     <el-row :gutter="20">
       <el-col :span="10">
         <span>{{fromLocale}}</span>
+        ===
         <i class="el-icon-d-arrow-right"></i>
-        <i class="el-icon-d-arrow-right"></i>
-        <i class="el-icon-d-arrow-right"></i>
-        <span>{{toLocale}} </span>
         <el-select :value="toLocale"  @change="updateToLocale" filterable placeholder="请选择">
-          <!-- TODO: 是否禁用与来源相同的语言？ -->
+          <!-- 禁用与来源相同的语言？ -->
           <el-option
             v-for="locale in validToLocaleList"
             :key="locale"
