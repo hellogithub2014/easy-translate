@@ -1,10 +1,16 @@
 <template>
   <span>
-    <el-button type="primary" @click="showDialog = true">单复数</el-button>
+
+    <!-- 弹窗隐藏时显示缩略图 -->
+    <thumb-view :text="thumbViewText" @clicThumb="showDialog = true"></thumb-view>
+
+
     <el-dialog
       title="提示"
       :visible.sync="showDialog"
       width="30%"
+      :show-close="false"
+      :close-on-click-modal="false"
     >
       <el-form ref="pluralForm" :model="formModel"  :inline="true">
         <el-form-item label="字段名(必填):">
@@ -25,8 +31,13 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="showDialog-footer">
-        <el-button @click="showDialog = false">取 消</el-button>
-        <el-button type="primary" @click="confirm">确 定</el-button>
+        <el-button @click="tryCancelAddTool">取 消</el-button>
+        <el-button
+          type="primary"
+          :disabled="!isPluralValid"
+          @click="confirm">
+          确 定
+        </el-button>
       </span>
     </el-dialog>
   </span>
@@ -34,18 +45,38 @@
 
 <script>
 import { mapState } from 'vuex';
+import ThumbView from './ThumbView';
 
 export default {
   name: 'plural-tool',
+  components: {
+    ThumbView,
+  },
+  props: {
+    value: {
+      type: Object,
+      reuqired: true,
+    },
+  },
   data() {
+    const {
+      showDialog = false,
+      plural = '',
+      zero = '',
+      one = '',
+      other = '',
+      isNew = false,
+    } = this.value;
+
     return {
-      showDialog: false,
+      showDialog,
       formModel: {
-        plural: '',
-        zero: '',
-        one: '',
-        other: '',
+        plural,
+        zero,
+        one,
+        other,
       },
+      isNew,
     };
   },
   computed: {
@@ -63,31 +94,48 @@ export default {
       // 只在英文下显示,中文、日文下没有此项
       return this.toLocale === this.availableLocales.en;
     },
+    thumbViewText() {
+      const { zero, one, other } = this.formModel;
+      return `${zero} | ${this.showPluralOne ? `${one} | ` : ''}${other}`;
+    },
+    isPluralValid() {
+      const { plural, zero, one, other } = this.formModel;
+
+      return !(!plural || !zero || !other || (this.showPluralOne && !one));
+    },
+  },
+  watch: {
+    value(newVal) {
+      const {
+        showDialog = false,
+        plural = '',
+        zero = '',
+        one = '',
+        other = '',
+        isNew = false,
+      } = newVal;
+      this.showDialog = showDialog;
+      this.formModel.plural = plural;
+      this.formModel.zero = zero;
+      this.formModel.one = one;
+      this.formModel.other = other;
+      this.isNew = isNew;
+    },
   },
   methods: {
     confirm() {
-      const pluralForm = this.$refs.pluralForm;
-      const { plural, zero, one, other } = this.formModel;
+      this.isNew = false;
       this.showDialog = false;
-
-      this.clearFormModel(); // 重置
-      pluralForm.resetFields();
-
-      if (plural.trim() && other.trim()) {
-        this.$emit('confirm', { plural, zero, one, other });
-      }
     },
-    clearFormModel() {
-      const { formModel } = this;
-      formModel.plural = '';
-      formModel.zero = '';
-      formModel.one = '';
-      formModel.other = '';
+    tryCancelAddTool() {
+      this.showDialog = false;
+      if (this.isNew) {
+        this.$emit('cancel');
+      }
     },
   },
 };
 </script>
 
 <style scoped>
-
 </style>

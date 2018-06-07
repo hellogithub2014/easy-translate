@@ -10,12 +10,20 @@
       <el-col :span="10">
         <div class="grid-content bg-purple-light">
           <div>
-            <variable-tool @confirm="addVariable"></variable-tool>
-            <plural-tool @confirm="addPlural"></plural-tool>
-            <!-- 暂时不添加多选一 -->
-            <!-- <select-tool @confirm="addSelect"></select-tool> -->
+            <el-button type="primary" size="mini" @click="addPlainText">纯文本</el-button>
+            <el-button type="primary" size="mini" @click="addVariable">插值</el-button>
+            <el-button type="primary" size="mini" @click="addPlural">单复数</el-button>
           </div>
-          <el-input  type="textarea" autosize :value="toText" @change="updateToText"></el-input>
+          <div>
+            <span  class="component-wrapper" v-for="(tool,index) in tools" :key="index">
+              <span class="cross" @click="removeTool(index)">x</span>
+              <component
+                :is="tool.component"
+                :value="tool.value"
+                @cancel="removeTool(index)">
+              </component>
+            </span>
+          </div>
         </div>
       </el-col>
       <el-col :span="4">
@@ -40,8 +48,9 @@
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
 
-import PluralTool from './PluralTool';
-import VariableTool from './VariableTool';
+import PluralTool from './tools/PluralTool';
+import VariableTool from './tools/VariableTool';
+import PlainTextTool from './tools/PlainTextTool';
 import TransItemPreview from './TransItemPreview';
 
 import TYPES from '../store/mutation-types';
@@ -51,6 +60,7 @@ export default {
   components: {
     PluralTool,
     VariableTool,
+    PlainTextTool,
     TransItemPreview,
   },
   props: {
@@ -62,6 +72,7 @@ export default {
   data() {
     return {
       showPreview: false,
+      tools: [],
     };
   },
   computed: {
@@ -77,6 +88,14 @@ export default {
       return this.getTextByPath(this.toLocale, this.path);
     },
   },
+  mounted() {
+    this.tools.push({
+      component: 'plain-text-tool',
+      value: {
+        plainText: this.fromText,
+      },
+    });
+  },
   methods: {
     ...mapMutations({
       updateText: TYPES.UPDATE_TEXT,
@@ -90,33 +109,85 @@ export default {
       // TODO:  检查词条文本格式
     },
 
-    /** 翻译文本中追加插值  */
-    addVariable({ variableName }) {
-      const newText = `${this.toText}{${variableName}}`;
+    /**
+     * @param { KeyboardEvent } keyboardEvent
+     */
+    tryAddTool(keyboardEvent) {
+      switch (keyboardEvent.key.toUpperCase()) {
+        case 'T':
+          this.addPlainText();
+          break;
+        case 'U':
+          this.addPlural();
+          break;
+        case 'I':
+          this.addVariable();
+          break;
+        default:
+          break;
+      }
+    },
 
-      this.updateText({
-        locale: this.toLocale,
-        newText,
-        path: this.path,
+    removeTool(index) {
+      this.tools.splice(index, 1);
+    },
+
+    addPlainText() {
+      this.tools.push({
+        component: 'plain-text-tool',
+        value: {
+          plainText: '',
+        },
+      });
+    },
+    /** 翻译文本中追加插值  */
+    addVariable() {
+      // const newText = `${this.toText}{${variableName}}`;
+
+      // this.updateText({
+      //   locale: this.toLocale,
+      //   newText,
+      //   path: this.path,
+      // });
+
+      this.tools.push({
+        component: 'variable-tool',
+        value: {
+          variableName: '',
+          showDialog: true,
+          isNew: true,
+        },
       });
     },
 
     /** 翻译文本中追加单复数  */
-    addPlural({ plural, zero, one, other }) {
-      let addedText = `{${plural}, plural, `;
+    addPlural() {
+      // let addedText = `{${plural}, plural, `;
 
-      addedText += `=0{${zero}} `;
+      // addedText += `=0{${zero}} `;
 
-      if (one.trim()) {
-        addedText += `one{${one}} `;
-      }
+      // if (one.trim()) {
+      //   addedText += `one{${one}} `;
+      // }
 
-      addedText += `other{${other}}}`;
+      // addedText += `other{${other}}}`;
 
-      this.updateText({
-        locale: this.toLocale,
-        newText: this.toText + addedText,
-        path: this.path,
+      // this.updateText({
+      //   locale: this.toLocale,
+      //   newText: this.toText + addedText,
+      //   path: this.path,
+      // });
+
+      this.tools.push({
+        component: 'plural-tool',
+        value: {
+          plural: '',
+          zero: '',
+          one: '',
+          other: '',
+          showDialog: true,
+          isNew: true,
+        },
       });
     },
 
@@ -132,7 +203,30 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.component-wrapper {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+.cross {
+  display: none;
+  position: absolute;
+  top: -11px;
+  right: -5px;
+  height: 16px;
+  border-radius: 8px;
+  background-color: rgba(200, 10, 10, 0.8);
+  width: 16px;
+  color: #fff;
+  text-align: center;
+  line-height: 16px;
+}
+
+.component-wrapper:hover .cross {
+  display: block;
+}
+
 .el-input {
   width: auto;
 }
