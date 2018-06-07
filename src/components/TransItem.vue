@@ -10,9 +10,9 @@
       <el-col :span="10">
         <div class="grid-content bg-purple-light">
           <div>
-            <el-button type="primary" size="mini" @click="addPlainText">纯文本</el-button>
-            <el-button type="primary" size="mini" @click="addVariable">插值</el-button>
-            <el-button type="primary" size="mini" @click="addPlural">单复数</el-button>
+            <el-button type="primary" size="mini" @click="addPlainTextTool">纯文本</el-button>
+            <el-button type="primary" size="mini" @click="addVariableTool">插值</el-button>
+            <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
           </div>
           <div>
             <span  class="component-wrapper" v-for="(tool,index) in tools" :key="index">
@@ -20,7 +20,9 @@
               <component
                 :is="tool.component"
                 :value="tool.value"
-                @cancel="removeTool(index)">
+                @cancel="removeTool(index)"
+                @add="addToText"
+                @update="changeToText(index, $event)">
               </component>
             </span>
           </div>
@@ -54,6 +56,7 @@ import PlainTextTool from './tools/PlainTextTool';
 import TransItemPreview from './TransItemPreview';
 
 import TYPES from '../store/mutation-types';
+import TOOL_NAME from '../const/tool-name';
 
 export default {
   name: 'trans-item',
@@ -93,6 +96,7 @@ export default {
       component: 'plain-text-tool',
       value: {
         plainText: this.fromText,
+        composeText: this.fromText, // 用于在计算拼接词条时统一用的属性
       },
     });
   },
@@ -118,68 +122,41 @@ export default {
           this.addPlainText();
           break;
         case 'U':
-          this.addPlural();
+          this.addPluralTool();
           break;
         case 'I':
-          this.addVariable();
+          this.addVariableTool();
           break;
         default:
           break;
       }
     },
 
-    removeTool(index) {
-      this.tools.splice(index, 1);
-    },
-
-    addPlainText() {
+    addPlainTextTool() {
       this.tools.push({
-        component: 'plain-text-tool',
+        component: TOOL_NAME.PLAIN_TEXT_TOOL,
         value: {
           plainText: '',
+          composeText: '',
         },
       });
     },
     /** 翻译文本中追加插值  */
-    addVariable() {
-      // const newText = `${this.toText}{${variableName}}`;
-
-      // this.updateText({
-      //   locale: this.toLocale,
-      //   newText,
-      //   path: this.path,
-      // });
-
+    addVariableTool() {
       this.tools.push({
-        component: 'variable-tool',
+        component: TOOL_NAME.VARIABLE_TOOL,
         value: {
           variableName: '',
           showDialog: true,
           isNew: true,
+          composeText: '',
         },
       });
     },
-
     /** 翻译文本中追加单复数  */
-    addPlural() {
-      // let addedText = `{${plural}, plural, `;
-
-      // addedText += `=0{${zero}} `;
-
-      // if (one.trim()) {
-      //   addedText += `one{${one}} `;
-      // }
-
-      // addedText += `other{${other}}}`;
-
-      // this.updateText({
-      //   locale: this.toLocale,
-      //   newText: this.toText + addedText,
-      //   path: this.path,
-      // });
-
+    addPluralTool() {
       this.tools.push({
-        component: 'plural-tool',
+        component: TOOL_NAME.PLURAL_TOOL,
         value: {
           plural: '',
           zero: '',
@@ -187,8 +164,36 @@ export default {
           other: '',
           showDialog: true,
           isNew: true,
+          composeText: '',
         },
       });
+    },
+
+    removeTool(index) {
+      this.tools.splice(index, 1);
+      this.updateToText(this.composeAllToolText());
+    },
+
+    addToText(eventParam) {
+      this.changeToText(this.tools.length - 1, eventParam);
+    },
+
+    changeToText(index, eventParam) {
+      // const newValue = this.updateToolValue(this.tools[index]);
+
+      this.tools.splice(index, 1, {
+        ...this.tools[index],
+        value: {
+          ...this.tools[index].value,
+          ...eventParam,
+        },
+      });
+      this.updateToText(this.composeAllToolText());
+    },
+
+    // 组合所有tool的composeText
+    composeAllToolText() {
+      return this.tools.reduce((result, cur) => result + cur.value.composeText, '');
     },
 
     /** 更改store中的目标翻译文本  */

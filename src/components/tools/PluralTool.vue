@@ -46,9 +46,10 @@
 <script>
 import { mapState } from 'vuex';
 import ThumbView from './ThumbView';
+import TOOL_NAME from '../../const/tool-name';
 
 export default {
-  name: 'plural-tool',
+  name: TOOL_NAME.PLURAL_TOOL,
   components: {
     ThumbView,
   },
@@ -103,6 +104,20 @@ export default {
 
       return !(!plural || !zero || !other || (this.showPluralOne && !one));
     },
+    composeText() {
+      const { plural, zero, one, other } = this.formModel;
+
+      let addedText = `{${plural}, plural, `;
+      addedText += `=0{${zero}} `;
+
+      if (one.trim()) {
+        addedText += `one{${one}} `;
+      }
+
+      addedText += `other{${other}}}`;
+
+      return addedText;
+    },
   },
   watch: {
     value(newVal) {
@@ -124,8 +139,21 @@ export default {
   },
   methods: {
     confirm() {
-      this.isNew = false;
+      const { composeText, formModel } = this;
       this.showDialog = false;
+
+      const eventParam = {
+        ...this.$data,
+        ...formModel,
+        composeText,
+      };
+
+      if (this.isNew) {
+        this.$emit('add', eventParam);
+        this.isNew = false;
+      } else {
+        this.$emit('update', eventParam);
+      }
     },
     tryCancelAddTool() {
       this.showDialog = false;

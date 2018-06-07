@@ -2,7 +2,7 @@
   <span>
 
     <!-- 弹窗隐藏时显示缩略图 -->
-    <thumb-view :text="formModel.variableName" @clicThumb="showDialog = true"></thumb-view>
+    <thumb-view :text="composeText" @clicThumb="showDialog = true"></thumb-view>
 
     <el-dialog
       title="提示"
@@ -26,9 +26,10 @@
 
 <script>
 import ThumbView from './ThumbView';
+import TOOL_NAME from '../../const/tool-name';
 
 export default {
-  name: 'variable-tool',
+  name: TOOL_NAME.VARIABLE_TOOL,
   components: {
     ThumbView,
   },
@@ -53,6 +54,9 @@ export default {
     isVariableEmpty() {
       return !this.formModel.variableName;
     },
+    composeText() {
+      return `{${this.formModel.variableName}}`;
+    },
   },
   watch: {
     value(newVal) {
@@ -64,8 +68,21 @@ export default {
   },
   methods: {
     confirm() {
-      this.isNew = false;
+      const { composeText, formModel } = this;
       this.showDialog = false;
+
+      const eventParam = {
+        ...this.$data,
+        ...formModel,
+        composeText,
+      };
+
+      if (this.isNew) {
+        this.$emit('add', eventParam);
+        this.isNew = false;
+      } else {
+        this.$emit('update', eventParam);
+      }
     },
     tryCancelAddTool() {
       this.showDialog = false;
