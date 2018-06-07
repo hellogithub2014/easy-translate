@@ -4,7 +4,8 @@ import setPathValue from '../utils/setPathValue';
 export default {
   [TYPES.UPDATE_TEXT](state, { locale, path, newText }) {
     const { messages } = state;
-    if (messages[locale] && messages[locale][path]) {
+    const pathValue = messages[locale][path];
+    if (messages[locale] && pathValue !== undefined && pathValue !== null) {
       messages[locale][path] = newText;
     }
   },

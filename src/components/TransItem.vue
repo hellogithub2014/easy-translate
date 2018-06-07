@@ -1,13 +1,16 @@
 <template>
   <div class="trans-item">
     <!-- 词包翻译区 -->
-    <el-row :gutter="20">
-      <el-col :span="10" >
+    <el-row :gutter="20" class="translate-wrapper">
+      <el-col :span="9" >
         <div class="grid-content bg-purple">
           <p style="margin: 0;">{{fromText}}</p>
         </div>
       </el-col>
-      <el-col :span="10">
+      <el-col :span="2">
+        ======>
+      </el-col>
+      <el-col :span="9">
         <div class="grid-content bg-purple-light">
           <div>
             <el-button type="primary" size="mini" @click="addPlainTextTool">纯文本</el-button>
@@ -95,8 +98,8 @@ export default {
     this.tools.push({
       component: 'plain-text-tool',
       value: {
-        plainText: this.fromText,
-        composeText: this.fromText, // 用于在计算拼接词条时统一用的属性
+        plainText: this.toText,
+        composeText: this.toText, // 用于在计算拼接词条时统一用的属性
       },
     });
   },
@@ -179,8 +182,6 @@ export default {
     },
 
     changeToText(index, eventParam) {
-      // const newValue = this.updateToolValue(this.tools[index]);
-
       this.tools.splice(index, 1, {
         ...this.tools[index],
         value: {
@@ -209,6 +210,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.translate-wrapper {
+  display: flex;
+  align-items: center;
+}
+
 .component-wrapper {
   display: inline-block;
   position: relative;
