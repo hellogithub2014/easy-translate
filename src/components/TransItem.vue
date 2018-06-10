@@ -60,9 +60,9 @@ import PlainTextTool from './tools/PlainTextTool';
 import TransItemPreview from './TransItemPreview';
 
 import TYPES from '../store/mutation-types';
-import TOOL_NAME from '../const/tool-name';
 
 import formatParser from '../utils/format-parser';
+import translateTool from '../utils/translate-tool';
 
 export default {
   name: 'trans-item',
@@ -100,15 +100,7 @@ export default {
   },
   watch: {
     toLocale() {
-      this.tools = [
-        {
-          component: 'plain-text-tool',
-          value: {
-            plainText: this.toText,
-            composeText: this.toText, // 用于在计算拼接词条时统一用的属性
-          },
-        },
-      ];
+      this.tools = [translateTool.generatePlainTextTool(this.toText, this.toText)];
     },
   },
   mounted() {
@@ -167,40 +159,15 @@ export default {
     },
 
     addPlainTextTool() {
-      this.tools.push({
-        component: TOOL_NAME.PLAIN_TEXT_TOOL,
-        value: {
-          plainText: '',
-          composeText: '',
-        },
-      });
+      this.tools.push(translateTool.generatePlainTextTool());
     },
     /** 翻译文本中追加插值  */
     addVariableTool() {
-      this.tools.push({
-        component: TOOL_NAME.VARIABLE_TOOL,
-        value: {
-          variableName: '',
-          showDialog: true,
-          isNew: true,
-          composeText: '',
-        },
-      });
+      this.tools.push(translateTool.generateVaribaleTool());
     },
     /** 翻译文本中追加单复数  */
     addPluralTool() {
-      this.tools.push({
-        component: TOOL_NAME.PLURAL_TOOL,
-        value: {
-          plural: '',
-          zero: '',
-          one: '',
-          other: '',
-          showDialog: true,
-          isNew: true,
-          composeText: '',
-        },
-      });
+      this.tools.push(translateTool.generatePluralTool());
     },
 
     removeTool(index) {

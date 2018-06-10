@@ -1,3 +1,5 @@
+import translateTool from '../utils/translate-tool';
+
 const parser = require('intl-messageformat-parser');
 
 const ELEMNT_TYPE = {
@@ -34,9 +36,7 @@ export default {
    * @returns
    */
   parseToPlainTextTool(messageTextElement) {
-    return {
-      plainText: messageTextElement.value,
-    };
+    return translateTool.generatePlainTextTool(messageTextElement.value);
   },
   /**
    * 从AST元素的插值元素中生成插值变量名tool
@@ -46,9 +46,7 @@ export default {
    * @returns
    */
   parseToVariableTool(argumentElement) {
-    return {
-      variableName: argumentElement.id,
-    };
+    return translateTool.generateVaribaleTool(argumentElement.id);
   },
   /**
    * 从AST元素的插值元素中生成单复数tool
@@ -59,7 +57,7 @@ export default {
    */
   parseToPluralTool(argumentElement) {
     const {
-      id,
+      id: plural,
       format: { options },
     } = argumentElement;
 
@@ -82,11 +80,11 @@ export default {
       return resultClone;
     }, {});
 
-    return {
-      plural: id,
+    return translateTool.generatePluralTool({
+      plural,
       zero,
       one,
       other,
-    };
+    });
   },
 };
