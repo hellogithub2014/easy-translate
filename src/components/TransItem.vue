@@ -62,6 +62,8 @@ import TransItemPreview from './TransItemPreview';
 import TYPES from '../store/mutation-types';
 import TOOL_NAME from '../const/tool-name';
 
+import formatParser from '../utils/format-parser';
+
 export default {
   name: 'trans-item',
   mixins: [formatterMixin],
@@ -117,6 +119,14 @@ export default {
         composeText: this.toText, // 用于在计算拼接词条时统一用的属性
       },
     });
+    console.log(
+      formatParser.generateToolProperties(
+        `On {name} took {numPhotos, plural,
+          =0 {no photos.}
+          =1 {one photo.}
+          other {# photos.}}`,
+      ),
+    );
   },
   methods: {
     ...mapMutations({
