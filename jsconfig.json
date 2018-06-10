@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "mixins/*": ["src/mixins/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}

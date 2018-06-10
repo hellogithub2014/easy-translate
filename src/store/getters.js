@@ -14,6 +14,17 @@ export default {
   },
 
   /**
+   * 获取目标语言所有词包
+   *
+   * @author liubin.frontend
+   * @param {*} state
+   * @returns
+   */
+  getLocaleMessages(state) {
+    return locale => state.messages[locale];
+  },
+
+  /**
    * 根据path获取对应的词条文本
    *
    * @author liubin.frontend

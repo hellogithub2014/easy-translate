@@ -52,6 +52,7 @@
 
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
+import formatterMixin from '../mixins/formatterMixin';
 
 import PluralTool from './tools/PluralTool';
 import VariableTool from './tools/VariableTool';
@@ -63,6 +64,7 @@ import TOOL_NAME from '../const/tool-name';
 
 export default {
   name: 'trans-item',
+  mixins: [formatterMixin],
   components: {
     PluralTool,
     VariableTool,
@@ -94,6 +96,19 @@ export default {
       return this.getTextByPath(this.toLocale, this.path);
     },
   },
+  watch: {
+    toLocale() {
+      this.tools = [
+        {
+          component: 'plain-text-tool',
+          value: {
+            plainText: this.toText,
+            composeText: this.toText, // 用于在计算拼接词条时统一用的属性
+          },
+        },
+      ];
+    },
+  },
   mounted() {
     this.tools.push({
       component: 'plain-text-tool',
@@ -113,7 +128,13 @@ export default {
     },
 
     checkFormat() {
-      // TODO:  检查词条文本格式
+      const { toLocale, toText, formatterWithToLocale } = this;
+      try {
+        formatterWithToLocale.compile(toText, toLocale);
+        this.$message.success('格式正确');
+      } catch (e) {
+        this.$message.error(`格式错误,${e}`);
+      }
     },
 
     /**

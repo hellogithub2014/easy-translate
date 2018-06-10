@@ -1,27 +1,5 @@
 import TYPES from './mutation-types';
-
-function fetchLocaleMessage(locale) {
-  // TODO: 通过接口获取词包
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const r = Math.random();
-      if (r > 0.5) {
-        resolve({
-          greet: `ホーム ${locale}`,
-          variables: 'ブランド広告 {name} , {age}',
-          plural: 'レポート {n, plural, =0{トラッキングツール}  other{# アカウント一覧} }.',
-          selectordinal: 'セットコピー {POS, selectordinal, other{#クリックして更新}}',
-          select:
-            '{gender, select, male{認証コード} female{同意する} other{新規登録}} ログインできない場合.',
-          number: '現地時間: {current} , アニメ: {current, number, percent}',
-          time: '興味関心一覧: {current, time, short}',
-        });
-      } else {
-        reject('获取对应词包失败');
-      }
-    }, 2000);
-  });
-}
+import apiService from '../utils/api-service';
 
 export default {
   [TYPES.UPDATE_TO_LOCALE]({ commit, state }, newToLocale) {
@@ -29,13 +7,14 @@ export default {
     if (state.messages[newToLocale]) {
       commit(TYPES.UPDATE_TO_LOCALE, newToLocale);
     } else {
-      fetchLocaleMessage(newToLocale)
+      apiService[`fetch${newToLocale.toUpperCase()}`]()
         .then((message) => {
           commit(TYPES.ADD_LOCALE, { newLocale: newToLocale, message }); // 添加词包
           commit(TYPES.UPDATE_TO_LOCALE, newToLocale); // 切换目标语言
         })
-        // eslint-disable-next-line
-        .catch(console.error);
+        .catch((err) => {
+          this.$message.error(err);
+        });
     }
   },
   /**

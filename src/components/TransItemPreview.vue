@@ -44,10 +44,11 @@
 
 <script>
 import { mapState } from 'vuex';
-import MessageFormat from 'messageformat';
+import formatterMixin from '../mixins/formatterMixin';
 
 export default {
   name: 'trans-item-preview',
+  mixins: [formatterMixin],
   props: {
     fromText: {
       type: String,
@@ -97,12 +98,15 @@ export default {
         value: newVal,
       });
     },
-    /**  TODO: 在无法转换时提示报错信息;  TODO: 使用新版的MessageFormat */
-    getFormattedResult(locale, text) {
-      const mf = new MessageFormat(locale);
-      mf.setIntlSupport(true);
 
-      const message = mf.compile(text, locale);
+    /** TODO: 使用新版的MessageFormat */
+    getFormattedResult(mf, locale, text) {
+      let message = () => {};
+      try {
+        message = mf.compile(text, locale);
+      } catch (e) {
+        this.$message.error(`格式错误,${e}`);
+      }
       const o = this.previewParamList.reduce((total, cur) => {
         if (cur.key.trim()) {
           // eslint-disable-next-line
@@ -113,8 +117,21 @@ export default {
       return message(o);
     },
     format() {
-      this.formattedFromText = this.getFormattedResult(this.fromLocale, this.fromText);
-      this.formattedToText = this.getFormattedResult(this.toLocale, this.toText);
+      const {
+        fromText,
+        formatterWithFromLocale,
+        fromLocale,
+        toText,
+        formatterWithToLocale,
+        toLocale,
+      } = this;
+
+      this.formattedFromText = this.getFormattedResult(
+        formatterWithFromLocale,
+        fromLocale,
+        fromText,
+      );
+      this.formattedToText = this.getFormattedResult(formatterWithToLocale, toLocale, toText);
     },
   },
 };

@@ -78,8 +78,9 @@ export default {
       };
 
       if (this.isNew) {
-        this.$emit('add', eventParam);
         this.isNew = false;
+        eventParam.isNew = false;
+        this.$emit('add', eventParam);
       } else {
         this.$emit('update', eventParam);
       }
