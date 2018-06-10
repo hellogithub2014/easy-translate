@@ -14,18 +14,18 @@ export default {
    * @author liubin.frontend
    * @param {string} str
    */
-  generateToolProperties(str) {
+  parseTranslateTools(str, readonly = false) {
     const ast = parser.parse(str);
     const { elements } = ast;
     // 目前认为除了messageTextElement就是argumentElement，不考虑其他的
     return elements.map((element) => {
       if (element.type === ELEMNT_TYPE.TEXT) {
-        return this.parseToPlainTextTool(element); // 纯文本
+        return this.parseToPlainTextTool(element, readonly); // 纯文本
       }
       if (!element.format) {
-        return this.parseToVariableTool(element); // 插值
+        return this.parseToVariableTool(element, readonly); // 插值
       }
-      return this.parseToPluralTool(element); // 单复数
+      return this.parseToPluralTool(element, readonly); // 单复数
     });
   },
   /**
@@ -35,8 +35,11 @@ export default {
    * @param {{type: string, id: string, format:null} messageTextElement
    * @returns
    */
-  parseToPlainTextTool(messageTextElement) {
-    return translateTool.generatePlainTextTool(messageTextElement.value);
+  parseToPlainTextTool(messageTextElement, readonly = false) {
+    const generaor = readonly
+      ? translateTool.generateReadonlyPlainTextTool
+      : translateTool.generatePlainTextTool;
+    return generaor.call(translateTool, messageTextElement.value);
   },
   /**
    * 从AST元素的插值元素中生成插值变量名tool
@@ -45,8 +48,11 @@ export default {
    * @param {{type: string, id: string, format:null} argumentElement
    * @returns
    */
-  parseToVariableTool(argumentElement) {
-    return translateTool.generateVaribaleTool(argumentElement.id);
+  parseToVariableTool(argumentElement, readonly = false) {
+    const generaor = readonly
+      ? translateTool.generateReadonlyVaribaleTool
+      : translateTool.generateVaribaleTool;
+    return generaor.call(translateTool, argumentElement.id);
   },
   /**
    * 从AST元素的插值元素中生成单复数tool
@@ -55,11 +61,15 @@ export default {
    * @param { {type: string, id: string,format:{type: string, offset: number, options: {type:string, selector:string,value:{type:string,elements: {type:string,value:string}[]}}[]}} argumentElement
    * @returns
    */
-  parseToPluralTool(argumentElement) {
+  parseToPluralTool(argumentElement, readonly = false) {
     const {
       id: plural,
       format: { options },
     } = argumentElement;
+
+    const generaor = readonly
+      ? translateTool.generateReadonlyPluralTool
+      : translateTool.generatePluralTool;
 
     const { zero, one = '', other } = options.reduce((result, option) => {
       const resultClone = result;
@@ -80,7 +90,7 @@ export default {
       return resultClone;
     }, {});
 
-    return translateTool.generatePluralTool({
+    return generaor.call(translateTool, {
       plural,
       zero,
       one,

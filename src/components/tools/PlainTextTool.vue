@@ -1,6 +1,6 @@
 <template>
   <span>
-    <el-input type="textarea" autosize  @change="update" v-model="plainText"></el-input>
+    <el-input type="textarea" autosize  :disabled="readonly"  @change="update" v-model="plainText"></el-input>
   </span>
 </template>
 
@@ -16,16 +16,18 @@ export default {
     },
   },
   data() {
-    const { plainText } = this.value;
+    const { plainText, readonly } = this.value;
 
     return {
       plainText,
+      readonly,
     };
   },
   watch: {
     value(newVal) {
-      const { plainText } = newVal;
+      const { plainText, readonly } = newVal;
       this.plainText = plainText;
+      this.readonly = readonly;
     },
   },
   methods: {

@@ -14,19 +14,29 @@
     >
       <el-form ref="pluralForm" :model="formModel"  :inline="true">
         <el-form-item label="字段名(必填):">
-          <el-input v-model="formModel.plural" auto-complete="off" required></el-input>
+          <el-input
+            :disabled="readonly"
+            v-model="formModel.plural"
+            auto-complete="off"
+            required>
+          </el-input>
         </el-form-item>
         <!-- other是必须滴。 中文环境下，不需要one的选项，因为one和other显示时没有区别.
           不同环境下使用不用plural参见：http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html -->
         <el-form-item label="值为0时显示:">
-          <el-input v-model="formModel.zero" auto-complete="off"></el-input>
+          <el-input :disabled="readonly" v-model="formModel.zero" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item :label="labelOfPluralOne" v-show="showPluralOne">
-          <el-input v-model="formModel.one" auto-complete="off"></el-input>
+          <el-input :disabled="readonly" v-model="formModel.one" auto-complete="off"></el-input>
         </el-form-item>
         <!-- 必选 -->
         <el-form-item label="其他情况下显示(必填):">
-          <el-input v-model="formModel.other" auto-complete="off" required></el-input>
+          <el-input
+            :disabled="readonly"
+            v-model="formModel.other"
+            auto-complete="off"
+            required>
+          </el-input>
           <p>在此项中使用 <strong>#</strong> 代表真正的值。 如 "# messages"在字段值为3时会被翻译为 "3 messages"</p>
         </el-form-item>
       </el-form>
@@ -34,7 +44,7 @@
         <el-button @click="tryCancelAddTool">取 消</el-button>
         <el-button
           type="primary"
-          :disabled="!isPluralValid"
+          :disabled="!(readonly || isPluralValid)"
           @click="confirm">
           确 定
         </el-button>
@@ -67,6 +77,7 @@ export default {
       one = '',
       other = '',
       isNew = false,
+      readonly,
     } = this.value;
 
     return {
@@ -78,6 +89,7 @@ export default {
         other,
       },
       isNew,
+      readonly,
     };
   },
   computed: {
@@ -128,6 +140,7 @@ export default {
         one = '',
         other = '',
         isNew = false,
+        readonly,
       } = newVal;
       this.showDialog = showDialog;
       this.formModel.plural = plural;
@@ -135,6 +148,7 @@ export default {
       this.formModel.one = one;
       this.formModel.other = other;
       this.isNew = isNew;
+      this.readonly = readonly;
     },
   },
   methods: {

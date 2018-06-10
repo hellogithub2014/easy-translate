@@ -4,7 +4,14 @@
     <el-row :gutter="20" class="translate-wrapper">
       <el-col :span="9" >
         <div class="grid-content bg-purple">
-          <p style="margin: 0;">{{fromText}}</p>
+          <!-- <p style="margin: 0;">{{fromText}}</p> -->
+          <span  class="component-wrapper" v-for="(tool,index) in toolsOfFromText" :key="index">
+              <component
+                :is="tool.component"
+                :value="tool.value"
+                :read-only="tool.value.readonly">
+              </component>
+            </span>
         </div>
       </el-col>
       <el-col :span="2">
@@ -18,7 +25,7 @@
             <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
           </div>
           <div>
-            <span  class="component-wrapper" v-for="(tool,index) in tools" :key="index">
+            <span  class="component-wrapper" v-for="(tool,index) in toolsOfToText" :key="index">
               <span class="cross" @click="removeTool(index)">x</span>
               <component
                 :is="tool.component"
@@ -82,7 +89,7 @@ export default {
   data() {
     return {
       showPreview: false,
-      tools: [],
+      toolsOfToText: [],
     };
   },
   computed: {
@@ -97,28 +104,28 @@ export default {
     toText() {
       return this.getTextByPath(this.toLocale, this.path);
     },
+    toolsOfFromText() {
+      const tools = formatParser.parseTranslateTools(this.fromText, true);
+      return tools.map((tool) => {
+        const clone = tool;
+        clone.value.readonly = true;
+        return clone;
+      });
+    },
   },
   watch: {
     toLocale() {
-      this.tools = [translateTool.generatePlainTextTool(this.toText, this.toText)];
+      this.toolsOfToText = [translateTool.generatePlainTextTool(this.toText, this.toText)];
     },
   },
   mounted() {
-    this.tools.push({
+    this.toolsOfToText.push({
       component: 'plain-text-tool',
       value: {
         plainText: this.toText,
         composeText: this.toText, // 用于在计算拼接词条时统一用的属性
       },
     });
-    console.log(
-      formatParser.generateToolProperties(
-        `On {name} took {numPhotos, plural,
-          =0 {no photos.}
-          =1 {one photo.}
-          other {# photos.}}`,
-      ),
-    );
   },
   methods: {
     ...mapMutations({
@@ -159,31 +166,31 @@ export default {
     },
 
     addPlainTextTool() {
-      this.tools.push(translateTool.generatePlainTextTool());
+      this.toolsOfToText.push(translateTool.generatePlainTextTool());
     },
     /** 翻译文本中追加插值  */
     addVariableTool() {
-      this.tools.push(translateTool.generateVaribaleTool());
+      this.toolsOfToText.push(translateTool.generateVaribaleTool());
     },
     /** 翻译文本中追加单复数  */
     addPluralTool() {
-      this.tools.push(translateTool.generatePluralTool());
+      this.toolsOfToText.push(translateTool.generatePluralTool());
     },
 
     removeTool(index) {
-      this.tools.splice(index, 1);
+      this.toolsOfToText.splice(index, 1);
       this.updateToText(this.composeAllToolText());
     },
 
     addToText(eventParam) {
-      this.changeToText(this.tools.length - 1, eventParam);
+      this.changeToText(this.toolsOfToText.length - 1, eventParam);
     },
 
     changeToText(index, eventParam) {
-      this.tools.splice(index, 1, {
-        ...this.tools[index],
+      this.toolsOfToText.splice(index, 1, {
+        ...this.toolsOfToText[index],
         value: {
-          ...this.tools[index].value,
+          ...this.toolsOfToText[index].value,
           ...eventParam,
         },
       });
@@ -192,7 +199,7 @@ export default {
 
     // 组合所有tool的composeText
     composeAllToolText() {
-      return this.tools.reduce((result, cur) => result + cur.value.composeText, '');
+      return this.toolsOfToText.reduce((result, cur) => result + cur.value.composeText, '');
     },
 
     /** 更改store中的目标翻译文本  */

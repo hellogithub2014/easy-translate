@@ -13,7 +13,11 @@
     >
       <el-form ref="variableForm" :model="formModel"  :inline="true">
         <el-form-item label="插值字段名:">
-          <el-input v-model.trim="formModel.variableName" auto-complete="off"></el-input>
+          <el-input
+            :disabled="readonly"
+            v-model.trim="formModel.variableName"
+            auto-complete="off">
+          </el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="showDialog-footer">
@@ -40,7 +44,7 @@ export default {
     },
   },
   data() {
-    const { showDialog = false, variableName = '', isNew = false } = this.value;
+    const { showDialog = false, variableName = '', isNew = false, readonly } = this.value;
 
     return {
       showDialog,
@@ -48,6 +52,7 @@ export default {
         variableName,
       },
       isNew,
+      readonly,
     };
   },
   computed: {
@@ -60,10 +65,11 @@ export default {
   },
   watch: {
     value(newVal) {
-      const { showDialog = false, variableName = '', isNew = false } = newVal;
+      const { showDialog = false, variableName = '', isNew = false, readonly } = newVal;
       this.showDialog = showDialog;
       this.formModel.variableName = variableName;
       this.isNew = isNew;
+      this.readonly = readonly;
     },
   },
   methods: {

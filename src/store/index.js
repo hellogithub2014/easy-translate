@@ -33,6 +33,7 @@ Promise.all([apiService.fetchEN(), apiService.fetchZH()])
     store.state.messages.en = { ...en };
     store.state.messages.zh = { ...zh };
   })
-  .catch(err => this.$message.error(err));
+  // eslint-disable-next-line
+  .catch(console.error);
 
 export default store;
