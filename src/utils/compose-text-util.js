@@ -13,7 +13,7 @@ export default {
     addedText += `=0{${zero}} `;
 
     if (one.trim()) {
-      addedText += `one{${one}} `;
+      addedText += `=1{${one}} `;
     }
 
     addedText += `other{${other}}}`;

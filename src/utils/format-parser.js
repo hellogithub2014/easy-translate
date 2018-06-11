@@ -87,6 +87,7 @@ export default {
           resultClone.zero = text;
           break;
         case '=1':
+        case 'one':
           resultClone.one = text;
           break;
         case 'other':

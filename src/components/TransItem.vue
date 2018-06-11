@@ -9,6 +9,7 @@
               <component
                 :is="tool.component"
                 :value="tool.value"
+                :locale="fromLocale"
                 :read-only="tool.value.readonly">
               </component>
             </span>
@@ -30,6 +31,7 @@
               <component
                 :is="tool.component"
                 :value="tool.value"
+                :locale="toLocale"
                 @cancel="removeTool(index)"
                 @add="addToText"
                 @update="changeToText(index, $event)">

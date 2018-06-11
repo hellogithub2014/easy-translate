@@ -69,6 +69,10 @@ export default {
       type: Object,
       reuqired: true,
     },
+    locale: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     const {
@@ -96,17 +100,16 @@ export default {
   computed: {
     ...mapState({
       availableLocales: 'availableLocales',
-      toLocale: 'toLocale',
     }),
     labelOfPluralOne() {
       const prefix = '值为1时显示';
       const suffix = ':';
       const tips = '(可选)';
-      return prefix + (this.toLocale !== this.availableLocales.zh ? tips : '') + suffix;
+      return prefix + (this.showPluralOne ? tips : '') + suffix;
     },
     showPluralOne() {
       // 只在英文下显示,中文、日文下没有此项
-      return this.toLocale === this.availableLocales.en;
+      return this.locale === this.availableLocales.en;
     },
     thumbViewText() {
       const { zero, one, other } = this.formModel;
