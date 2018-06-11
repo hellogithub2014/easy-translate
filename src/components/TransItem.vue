@@ -14,6 +14,11 @@
               </component>
             </span>
         </div>
+        <!-- 预览 -->
+        <trans-item-preview
+          :tools="toolsOfFromText"
+          :locale="fromLocale"
+        ></trans-item-preview>
       </el-col>
       <el-col :span="2">
         ======>
@@ -39,23 +44,18 @@
             </span>
           </div>
         </div>
+        <!-- 预览 -->
+        <trans-item-preview
+          :tools="toolsOfToText"
+          :locale="toLocale"
+        ></trans-item-preview>
       </el-col>
       <el-col :span="4">
         <div class="grid-content bg-purple-light">
           <el-button type="success" @click="checkFormat">校验格式</el-button>
-          <el-button type="primary" @click="togglePreview">
-            {{showPreview ? '收起' : '预览' }}
-          </el-button>
         </div>
       </el-col>
     </el-row>
-
-    <!-- 预览 -->
-    <trans-item-preview
-      v-show="showPreview"
-      :fromText="fromText"
-      :toText="toText"
-    ></trans-item-preview>
   </div>
 </template>
 

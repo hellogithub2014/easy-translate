@@ -58,6 +58,7 @@ import { mapState } from 'vuex';
 import ThumbView from './ThumbView';
 import TOOL_NAME from '../../const/tool-name';
 import composeTextUtil from '../../utils/compose-text-util';
+import formatParser from '../../utils/format-parser';
 
 export default {
   name: TOOL_NAME.PLURAL_TOOL,
@@ -112,9 +113,8 @@ export default {
       return this.locale === this.availableLocales.en;
     },
     thumbViewText() {
-      const { zero } = this.formModel;
-      // return `${zero} | ${this.showPluralOne ? `${one} | ` : ''}${other}`;
-      return `${zero}(s)`;
+      const { other } = this.formModel;
+      return formatParser.pluralPreview({ other }, this.showPluralOne);
     },
     isPluralValid() {
       const { plural, zero, one, other } = this.formModel;

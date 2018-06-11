@@ -107,4 +107,16 @@ export default {
       composeText: composeTextUtil.pluralTool({ plural, zero, one, other }),
     });
   },
+  /**
+   * 计算单复数形式下，给翻译人员提示的实时翻译结果
+   *
+   * @author liubin.frontend
+   * @param {*} { other }
+   * @param {*} isLocaleEN
+   * @returns
+   */
+  pluralPreview({ other }, isLocaleEN) {
+    const replaced = other.replace('#', 99);
+    return isLocaleEN ? `${replaced}(s)` : replaced;
+  },
 };
