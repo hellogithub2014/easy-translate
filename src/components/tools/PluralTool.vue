@@ -164,7 +164,17 @@ export default {
     tryCancelAddTool() {
       this.showDialog = false;
       if (this.isNew) {
+        // 取消当前tool
         this.$emit('cancel');
+      } else {
+        // 重置为刚进来时的状态
+        const { plural, zero, one, other } = this.value;
+        this.formModel = Object.assign({}, this.formModel, {
+          plural,
+          zero,
+          one,
+          other,
+        });
       }
     },
   },

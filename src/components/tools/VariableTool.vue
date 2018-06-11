@@ -96,6 +96,8 @@ export default {
       this.showDialog = false;
       if (this.isNew) {
         this.$emit('cancel');
+      } else {
+        this.formModel.variableName = this.value.variableName;
       }
     },
   },
