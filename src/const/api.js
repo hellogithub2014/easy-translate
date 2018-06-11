@@ -1,7 +1,7 @@
 export default {
   lang: {
-    en: 'http://www.mocky.io/v2/5b1ddea931000070003ff535',
-    zh: 'http://www.mocky.io/v2/5b1d46243200005a00c36d93',
-    ja: 'http://www.mocky.io/v2/5b1d463b3200005100c36d94',
+    en: 'http://www.mocky.io/v2/5b1de80d3100006c003ff54d',
+    zh: 'http://www.mocky.io/v2/5b1de8413100008d003ff54e',
+    ja: 'http://www.mocky.io/v2/5b1de87331000070003ff54f',
   },
 };
