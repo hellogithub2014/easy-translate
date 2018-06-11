@@ -57,6 +57,7 @@
 import { mapState } from 'vuex';
 import ThumbView from './ThumbView';
 import TOOL_NAME from '../../const/tool-name';
+import composeTextUtil from '../../utils/compose-text-util';
 
 export default {
   name: TOOL_NAME.PLURAL_TOOL,
@@ -118,17 +119,7 @@ export default {
     },
     composeText() {
       const { plural, zero, one, other } = this.formModel;
-
-      let addedText = `{${plural}, plural, `;
-      addedText += `=0{${zero}} `;
-
-      if (one.trim()) {
-        addedText += `one{${one}} `;
-      }
-
-      addedText += `other{${other}}}`;
-
-      return addedText;
+      return composeTextUtil.pluralTool({ plural, zero, one, other });
     },
   },
   watch: {

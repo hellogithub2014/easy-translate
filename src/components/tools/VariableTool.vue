@@ -31,6 +31,7 @@
 <script>
 import ThumbView from './ThumbView';
 import TOOL_NAME from '../../const/tool-name';
+import composeTextUtil from '../../utils/compose-text-util';
 
 export default {
   name: TOOL_NAME.VARIABLE_TOOL,
@@ -60,7 +61,7 @@ export default {
       return !this.formModel.variableName;
     },
     composeText() {
-      return `{${this.formModel.variableName}}`;
+      return composeTextUtil.variableTool(this.formModel.variableName);
     },
   },
   watch: {

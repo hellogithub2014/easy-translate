@@ -105,27 +105,16 @@ export default {
       return this.getTextByPath(this.toLocale, this.path);
     },
     toolsOfFromText() {
-      const tools = formatParser.parseTranslateTools(this.fromText, true);
-      return tools.map((tool) => {
-        const clone = tool;
-        clone.value.readonly = true;
-        return clone;
-      });
+      return formatParser.parseTranslateTools(this.fromText, true);
     },
   },
   watch: {
     toLocale() {
-      this.toolsOfToText = [translateTool.generatePlainTextTool(this.toText, this.toText)];
+      this.toolsOfToText = formatParser.parseTranslateTools(this.toText);
     },
   },
   mounted() {
-    this.toolsOfToText.push({
-      component: 'plain-text-tool',
-      value: {
-        plainText: this.toText,
-        composeText: this.toText, // 用于在计算拼接词条时统一用的属性
-      },
-    });
+    this.toolsOfToText = formatParser.parseTranslateTools(this.toText);
   },
   methods: {
     ...mapMutations({
@@ -170,11 +159,11 @@ export default {
     },
     /** 翻译文本中追加插值  */
     addVariableTool() {
-      this.toolsOfToText.push(translateTool.generateVaribaleTool());
+      this.toolsOfToText.push(translateTool.generateVaribaleTool({ showDialog: true }));
     },
     /** 翻译文本中追加单复数  */
     addPluralTool() {
-      this.toolsOfToText.push(translateTool.generatePluralTool());
+      this.toolsOfToText.push(translateTool.generatePluralTool({ showDialog: true }));
     },
 
     removeTool(index) {

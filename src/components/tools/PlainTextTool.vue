@@ -1,11 +1,18 @@
 <template>
   <span>
-    <el-input type="textarea" autosize  :disabled="readonly"  @change="update" v-model="plainText"></el-input>
+    <el-input
+      type="textarea"
+      autosize
+      :disabled="readonly"
+      @change="update"
+      v-model="plainText">
+    </el-input>
   </span>
 </template>
 
 <script>
 import TOOL_NAME from '../../const/tool-name';
+import composeTextUtil from '../../utils/compose-text-util';
 
 export default {
   name: TOOL_NAME.PLAIN_TEXT_TOOL,
@@ -23,6 +30,11 @@ export default {
       readonly,
     };
   },
+  computed: {
+    composeText() {
+      return composeTextUtil.plainTextTool(this.plainText);
+    },
+  },
   watch: {
     value(newVal) {
       const { plainText, readonly } = newVal;
@@ -34,7 +46,7 @@ export default {
     update() {
       this.$emit('update', {
         plainText: this.plainText,
-        composeText: this.plainText,
+        composeText: this.composeText,
       });
     },
   },

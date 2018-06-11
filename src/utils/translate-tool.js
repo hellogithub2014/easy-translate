@@ -12,7 +12,7 @@ export default {
    * @param {string} [readonly=''] tool是否为只读
    * @returns
    */
-  generatePlainTextTool(plainText = '', composeText = '') {
+  generatePlainTextTool({ plainText = '', composeText = '' } = {}) {
     return {
       ...TOOL_TEMPLATE.PLAIN_TEXT,
       value: {
@@ -30,8 +30,8 @@ export default {
    * @param {string} [composeText='']
    * @returns
    */
-  generateReadonlyPlainTextTool(plainText = '', composeText = '') {
-    const tool = this.generatePlainTextTool(plainText, composeText);
+  generateReadonlyPlainTextTool({ plainText = '', composeText = '' } = {}) {
+    const tool = this.generatePlainTextTool({ plainText, composeText });
     return {
       ...tool,
       value: {
@@ -40,28 +40,35 @@ export default {
       },
     };
   },
-  generateVaribaleTool(variableName = '', composeText = '') {
+  generateVaribaleTool({ variableName = '', composeText = '', showDialog = false } = {}) {
     return {
       ...TOOL_TEMPLATE.VARIABLE,
       value: {
         ...TOOL_TEMPLATE.VARIABLE.value,
         variableName,
         composeText,
+        showDialog, // 是否显示弹窗
       },
     };
   },
-  generateReadonlyVaribaleTool(variableName = '', composeText = '') {
-    const tool = this.generateVaribaleTool(variableName, composeText);
+  generateReadonlyVaribaleTool({ variableName = '', composeText = '' } = {}) {
+    const tool = this.generateVaribaleTool({ variableName, composeText });
     return {
       ...tool,
       value: {
         ...tool.value,
-        showDialog: false, // 只读的不需要显示弹窗
         readonly: true,
       },
     };
   },
-  generatePluralTool({ plural = '', zero = '', one = '', other = '' } = {}, composeText = '') {
+  generatePluralTool({
+    plural = '',
+    zero = '',
+    one = '',
+    other = '',
+    composeText = '',
+    showDialog = false,
+  } = {}) {
     return {
       ...TOOL_TEMPLATE.PLURAL,
       value: {
@@ -71,19 +78,22 @@ export default {
         one,
         other,
         composeText,
+        showDialog,
       },
     };
   },
-  generateReadonlyPluralTool(
-    { plural = '', zero = '', one = '', other = '' } = {},
+  generateReadonlyPluralTool({
+    plural = '',
+    zero = '',
+    one = '',
+    other = '',
     composeText = '',
-  ) {
-    const tool = this.generatePluralTool({ plural, zero, one, other }, composeText);
+  } = {}) {
+    const tool = this.generatePluralTool({ plural, zero, one, other, composeText });
     return {
       ...tool,
       value: {
         ...tool.value,
-        showDialog: false, // 只读的不需要显示弹窗
         readonly: true,
       },
     };

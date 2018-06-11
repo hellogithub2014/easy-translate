@@ -1,4 +1,6 @@
+/* eslint-disable max-len */
 import translateTool from '../utils/translate-tool';
+import composeTextUtil from '../utils/compose-text-util';
 
 const parser = require('intl-messageformat-parser');
 
@@ -39,7 +41,10 @@ export default {
     const generaor = readonly
       ? translateTool.generateReadonlyPlainTextTool
       : translateTool.generatePlainTextTool;
-    return generaor.call(translateTool, messageTextElement.value);
+    return generaor.call(translateTool, {
+      plainText: messageTextElement.value,
+      composeText: composeTextUtil.plainTextTool(messageTextElement.value),
+    });
   },
   /**
    * 从AST元素的插值元素中生成插值变量名tool
@@ -52,7 +57,10 @@ export default {
     const generaor = readonly
       ? translateTool.generateReadonlyVaribaleTool
       : translateTool.generateVaribaleTool;
-    return generaor.call(translateTool, argumentElement.id);
+    return generaor.call(translateTool, {
+      variableName: argumentElement.id,
+      composeText: composeTextUtil.variableTool(argumentElement.id),
+    });
   },
   /**
    * 从AST元素的插值元素中生成单复数tool
@@ -95,6 +103,7 @@ export default {
       zero,
       one,
       other,
+      composeText: composeTextUtil.pluralTool({ plural, zero, one, other }),
     });
   },
 };
