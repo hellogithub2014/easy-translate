@@ -137,25 +137,6 @@ export default {
       }
     },
 
-    /**
-     * @param { KeyboardEvent } keyboardEvent
-     */
-    tryAddTool(keyboardEvent) {
-      switch (keyboardEvent.key.toUpperCase()) {
-        case 'T':
-          this.addPlainText();
-          break;
-        case 'U':
-          this.addPluralTool();
-          break;
-        case 'I':
-          this.addVariableTool();
-          break;
-        default:
-          break;
-      }
-    },
-
     addPlainTextTool() {
       this.toolsOfToText.push(translateTool.generatePlainTextTool());
     },

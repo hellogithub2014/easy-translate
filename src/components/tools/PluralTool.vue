@@ -112,8 +112,9 @@ export default {
       return this.locale === this.availableLocales.en;
     },
     thumbViewText() {
-      const { zero, one, other } = this.formModel;
-      return `${zero} | ${this.showPluralOne ? `${one} | ` : ''}${other}`;
+      const { zero } = this.formModel;
+      // return `${zero} | ${this.showPluralOne ? `${one} | ` : ''}${other}`;
+      return `${zero}(s)`;
     },
     isPluralValid() {
       const { plural, zero, one, other } = this.formModel;
