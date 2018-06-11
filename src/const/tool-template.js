@@ -17,7 +17,7 @@ export default {
     value: {
       variableName: '',
       showDialog: true,
-      isNew: true,
+      isNew: false, // 是否为新创建的tool
       composeText: '',
       readonly: false,
     },
@@ -30,7 +30,7 @@ export default {
       one: '',
       other: '',
       showDialog: true,
-      isNew: true,
+      isNew: false,
       composeText: '',
       readonly: false,
     },

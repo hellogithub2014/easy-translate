@@ -12,13 +12,14 @@ export default {
    * @param {string} [readonly=''] tool是否为只读
    * @returns
    */
-  generatePlainTextTool({ plainText = '', composeText = '' } = {}) {
+  generatePlainTextTool({ plainText = '', composeText = '', readonly = false } = {}) {
     return {
       ...TOOL_TEMPLATE.PLAIN_TEXT,
       value: {
         ...TOOL_TEMPLATE.PLAIN_TEXT.value,
         plainText,
         composeText,
+        readonly,
       },
     };
   },
@@ -31,16 +32,28 @@ export default {
    * @returns
    */
   generateReadonlyPlainTextTool({ plainText = '', composeText = '' } = {}) {
-    const tool = this.generatePlainTextTool({ plainText, composeText });
-    return {
-      ...tool,
-      value: {
-        ...tool.value,
-        readonly: true,
-      },
-    };
+    return this.generatePlainTextTool({ plainText, composeText, readonly: true });
   },
-  generateVaribaleTool({ variableName = '', composeText = '', showDialog = false } = {}) {
+  /**
+   *
+   *
+   * @author liubin.frontend
+   * @param {*} [{
+   *     variableName = '',
+   *     composeText = '',
+   *     showDialog = false,
+   *     isNew = false,
+   *     readonly = false,
+   *   }={}]
+   * @returns
+   */
+  generateVaribaleTool({
+    variableName = '',
+    composeText = '',
+    showDialog = false,
+    isNew = false,
+    readonly = false,
+  } = {}) {
     return {
       ...TOOL_TEMPLATE.VARIABLE,
       value: {
@@ -48,19 +61,37 @@ export default {
         variableName,
         composeText,
         showDialog, // 是否显示弹窗
+        isNew,
+        readonly,
       },
     };
   },
+  /**
+   *
+   *
+   * @author liubin.frontend
+   * @param {*} [{ variableName = '', composeText = '' }={}]
+   * @returns
+   */
   generateReadonlyVaribaleTool({ variableName = '', composeText = '' } = {}) {
-    const tool = this.generateVaribaleTool({ variableName, composeText });
-    return {
-      ...tool,
-      value: {
-        ...tool.value,
-        readonly: true,
-      },
-    };
+    return this.generateVaribaleTool({ variableName, composeText, readonly: true });
   },
+  /**
+   *
+   *
+   * @author liubin.frontend
+   * @param {*} [{
+   *     plural = '',
+   *     zero = '',
+   *     one = '',
+   *     other = '',
+   *     composeText = '',
+   *     showDialog = false,
+   *     isNew = false,
+   *     readonly = false,
+   *   }={}]
+   * @returns
+   */
   generatePluralTool({
     plural = '',
     zero = '',
@@ -68,6 +99,8 @@ export default {
     other = '',
     composeText = '',
     showDialog = false,
+    isNew = false,
+    readonly = false,
   } = {}) {
     return {
       ...TOOL_TEMPLATE.PLURAL,
@@ -79,9 +112,24 @@ export default {
         other,
         composeText,
         showDialog,
+        isNew,
+        readonly,
       },
     };
   },
+  /**
+   *
+   *
+   * @author liubin.frontend
+   * @param {*} [{
+   *     plural = '',
+   *     zero = '',
+   *     one = '',
+   *     other = '',
+   *     composeText = '',
+   *   }={}]
+   * @returns
+   */
   generateReadonlyPluralTool({
     plural = '',
     zero = '',
@@ -89,13 +137,6 @@ export default {
     other = '',
     composeText = '',
   } = {}) {
-    const tool = this.generatePluralTool({ plural, zero, one, other, composeText });
-    return {
-      ...tool,
-      value: {
-        ...tool.value,
-        readonly: true,
-      },
-    };
+    return this.generatePluralTool({ plural, zero, one, other, composeText, readonly: true });
   },
 };

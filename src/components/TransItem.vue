@@ -159,11 +159,13 @@ export default {
     },
     /** 翻译文本中追加插值  */
     addVariableTool() {
-      this.toolsOfToText.push(translateTool.generateVaribaleTool({ showDialog: true }));
+      this.toolsOfToText.push(
+        translateTool.generateVaribaleTool({ showDialog: true, isNew: true }),
+      );
     },
     /** 翻译文本中追加单复数  */
     addPluralTool() {
-      this.toolsOfToText.push(translateTool.generatePluralTool({ showDialog: true }));
+      this.toolsOfToText.push(translateTool.generatePluralTool({ showDialog: true, isNew: true }));
     },
 
     removeTool(index) {
