@@ -30,7 +30,7 @@
             <el-button type="primary" size="mini" @click="addVariableTool">插值</el-button>
             <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
           </div>
-          <div>
+          <div class="translate-area">
             <span  class="component-wrapper" v-for="(tool,index) in toolsOfToText" :key="index">
               <span class="cross" @click="removeTool(index)">x</span>
               <component
@@ -193,7 +193,10 @@ export default {
   display: flex;
   align-items: center;
 }
-
+.translate-area {
+  display: flex;
+  align-items: center;
+}
 .component-wrapper {
   display: inline-block;
   position: relative;

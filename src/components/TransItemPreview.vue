@@ -38,7 +38,7 @@ export default {
             preResult += tool.value.plainText;
             break;
           case TOOL_NAME.VARIABLE_TOOL:
-            preResult += `test_${tool.value.variableName}`;
+            preResult += 'xx';
             break;
           case TOOL_NAME.PLURAL_TOOL:
             preResult += formatParser.pluralPreview({ other: tool.value.other }, this.isLocaleEN);

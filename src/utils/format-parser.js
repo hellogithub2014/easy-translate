@@ -116,7 +116,7 @@ export default {
    * @returns
    */
   pluralPreview({ other }, isLocaleEN) {
-    const replaced = other.replace('#', 99);
+    const replaced = other.replace('#', 'xx');
     return isLocaleEN ? `${replaced}(s)` : replaced;
   },
 };
