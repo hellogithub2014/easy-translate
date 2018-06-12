@@ -1,10 +1,23 @@
 <template>
   <div class="trans-item">
-    <!-- 词包翻译区 -->
-    <el-row :gutter="20" class="translate-wrapper">
-      <el-col :span="9" >
-        <div class="grid-content bg-purple">
-          <!-- <p style="margin: 0;">{{fromText}}</p> -->
+    <!-- 第一行，一些状态和工具 -->
+    <el-row class="tools-wrapper">
+      <el-col :span="12" class="center-middle">
+        <span> ###id</span>
+      </el-col>
+      <el-col :span="12" class="center-middle">
+        <el-button type="primary" size="mini" @click="addPlainTextTool">纯文本</el-button>
+        <el-button type="primary" size="mini" @click="addVariableTool">插值</el-button>
+        <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
+        <el-button type="success"  size="mini" @click="checkFormat">校验格式</el-button>
+      </el-col>
+    </el-row>
+
+    <!-- 第二行，翻译区域 -->
+    <el-row class="translate-wrapper">
+      <!-- 左列只读基础文本 -->
+      <el-col :span="12" class="space-between">
+        <div class="translate-area">
           <span  class="component-wrapper" v-for="(tool,index) in toolsOfFromText" :key="index">
               <component
                 :is="tool.component"
@@ -20,42 +33,29 @@
           :locale="fromLocale"
         ></trans-item-preview>
       </el-col>
-      <el-col :span="2">
-        ======>
-      </el-col>
-      <el-col :span="9">
-        <div class="grid-content bg-purple-light">
-          <div>
-            <el-button type="primary" size="mini" @click="addPlainTextTool">纯文本</el-button>
-            <el-button type="primary" size="mini" @click="addVariableTool">插值</el-button>
-            <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
-          </div>
-          <div class="translate-area">
-            <span  class="component-wrapper" v-for="(tool,index) in toolsOfToText" :key="index">
-              <span class="cross" @click="removeTool(index)">x</span>
-              <component
-                :is="tool.component"
-                :value="tool.value"
-                :locale="toLocale"
-                @cancel="removeTool(index)"
-                @add="addToText"
-                @update="changeToText(index, $event)">
-              </component>
-            </span>
-          </div>
+      <!-- 右列可操作翻译文本 -->
+      <el-col :span="12" class="space-between">
+        <div class="translate-area">
+          <span  class="component-wrapper" v-for="(tool,index) in toolsOfToText" :key="index">
+            <span class="cross" @click="removeTool(index)">x</span>
+            <component
+              :is="tool.component"
+              :value="tool.value"
+              :locale="toLocale"
+              @cancel="removeTool(index)"
+              @add="addToText"
+              @update="changeToText(index, $event)">
+            </component>
+          </span>
         </div>
-        <!-- 预览 -->
+          <!-- 预览 -->
         <trans-item-preview
           :tools="toolsOfToText"
           :locale="toLocale"
         ></trans-item-preview>
       </el-col>
-      <el-col :span="4">
-        <div class="grid-content bg-purple-light">
-          <el-button type="success" @click="checkFormat">校验格式</el-button>
-        </div>
-      </el-col>
     </el-row>
+
   </div>
 </template>
 
@@ -189,44 +189,73 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.space-between {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.center-middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.el-col {
+  border: 1px solid #fff;
+  border-radius: 4px;
+  height: 40px;
+}
+
+.trans-item {
+  background-color: rgba(200, 200, 200, 0.3);
+}
+
+.tools-wrapper {
+  margin-top: 20px;
+}
+
 .translate-wrapper {
   display: flex;
   align-items: center;
-}
-.translate-area {
-  display: flex;
-  align-items: center;
-}
-.component-wrapper {
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
-}
-.cross {
-  display: none;
-  position: absolute;
-  top: -11px;
-  right: -5px;
-  height: 16px;
-  border-radius: 8px;
-  background-color: rgba(200, 10, 10, 0.8);
-  width: 16px;
-  color: #fff;
-  text-align: center;
-  line-height: 16px;
-}
 
-.component-wrapper:hover .cross {
-  display: block;
-}
+  .el-input {
+    width: auto;
+  }
 
-.el-input {
-  width: auto;
-}
-.el-row {
-  margin: 20px 0;
-}
-.trans-item {
-  background-color: rgba(200, 200, 200, 0.3);
+  .component-wrapper {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+
+    .cross {
+      display: none;
+      position: absolute;
+      top: -11px;
+      right: -5px;
+      height: 16px;
+      border-radius: 8px;
+      background-color: rgba(200, 10, 10, 0.8);
+      width: 16px;
+      color: #fff;
+      text-align: center;
+      line-height: 16px;
+    }
+
+    &:hover .cross {
+      display: block;
+    }
+  }
+
+  .translate-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .el-col {
+    height: 100px;
+  }
 }
 </style>
