@@ -108,6 +108,8 @@ export default {
   data() {
     return {
       showPreview: false,
+      // normalMode下的一些属性，如单复数词条会拆成3条，插值变量会使用掩码字符代替
+      normalModeProperty: {},
       toolsOfToText: [],
     };
   },
