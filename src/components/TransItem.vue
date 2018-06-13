@@ -6,18 +6,18 @@
         <span> ###id</span>
       </el-col>
       <el-col :span="12" class="center-middle">
-        <el-button type="primary" size="mini" @click="addPlainTextTool">纯文本</el-button>
-        <el-button type="primary" size="mini" @click="addVariableTool">插值</el-button>
-        <el-button type="primary" size="mini" @click="addPluralTool">单复数</el-button>
-        <el-button type="success"  size="mini" @click="checkFormat">校验格式</el-button>
+        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addPlainTextTool">纯文本</el-button>
+        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addVariableTool">插值</el-button>
+        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addPluralTool">单复数</el-button>
+        <el-button type="success" v-if="isExpertMode" size="mini" @click="checkFormat">校验格式</el-button>
       </el-col>
     </el-row>
 
     <!-- 第二行，翻译区域 -->
     <el-row class="translate-wrapper">
       <!-- 左列只读基础文本 -->
-      <el-col :span="12" class="space-between">
-        <div class="translate-area">
+      <el-col :span="12" :class="{'space-between':isExpertMode, 'center-middle':isNormalMode }">
+        <div class="translate-area" v-if="isExpertMode">
           <span  class="component-wrapper" v-for="(tool,index) in toolsOfFromText" :key="index">
               <component
                 :is="tool.component"
@@ -29,14 +29,20 @@
         </div>
         <!-- 预览 -->
         <trans-item-preview
+          v-if="isExpertMode"
           :tools="toolsOfFromText"
           :locale="fromLocale"
         ></trans-item-preview>
+
+        <p v-if="isNormalMode">{{fromText}}</p>
       </el-col>
       <!-- 右列可操作翻译文本 -->
-      <el-col :span="12" class="space-between">
-        <div class="translate-area">
-          <span  class="component-wrapper" v-for="(tool,index) in toolsOfToText" :key="index">
+      <el-col :span="12" :class="{'space-between':isExpertMode, 'center-middle':isNormalMode }">
+        <div class="translate-area" v-if="isExpertMode">
+          <span
+            class="component-wrapper"
+            v-for="(tool,index) in toolsOfToText"
+            :key="index">
             <span class="cross" @click="removeTool(index)">x</span>
             <component
               :is="tool.component"
@@ -50,9 +56,20 @@
         </div>
           <!-- 预览 -->
         <trans-item-preview
+          v-if="isExpertMode"
           :tools="toolsOfToText"
           :locale="toLocale"
         ></trans-item-preview>
+
+        <el-input
+          v-if="isNormalMode"
+          v-model="toText"
+          type="textarea"
+          :rows="3"
+          :cols="10"
+          clearable
+        ></el-input>
+
       </el-col>
     </el-row>
 
@@ -99,7 +116,7 @@ export default {
       fromLocale: 'fromLocale',
       toLocale: 'toLocale',
     }),
-    ...mapGetters(['getTextByPath']),
+    ...mapGetters(['getTextByPath', 'isNormalMode', 'isExpertMode']),
     fromText() {
       return this.getTextByPath(this.fromLocale, this.path);
     },
@@ -142,9 +159,7 @@ export default {
     },
     /** 翻译文本中追加插值  */
     addVariableTool() {
-      this.toolsOfToText.push(
-        translateTool.generateVaribaleTool({ showDialog: true, isNew: true }),
-      );
+      this.toolsOfToText.push(translateTool.generateVaribaleTool({ showDialog: true, isNew: true }));
     },
     /** 翻译文本中追加单复数  */
     addPluralTool() {

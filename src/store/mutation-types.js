@@ -4,4 +4,5 @@ export default {
   ADD_LOCALE: 'ADD_LOCALE',
   ADD_ENTRY: 'ADD_ENTRY', // 添加词条
   BATCH_ADD_ENTRY: 'BATCH_ADD_ENTRY',
+  UPDATE_MODE: 'UPDATE_MODE',
 };

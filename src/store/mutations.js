@@ -23,4 +23,7 @@ export default {
     const localeMessage = state.messages[locale];
     setPathValue(localeMessage, path, text);
   },
+  [TYPES.UPDATE_MODE](state, mode) {
+    state.mode = mode;
+  },
 };

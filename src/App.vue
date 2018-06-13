@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <nav-menu></nav-menu>
     <router-link to="hello-world"></router-link>
     <router-link to="translate"></router-link>
     <router-view/>
@@ -7,8 +8,13 @@
 </template>
 
 <script>
+import NavMenu from './components/NavMenu';
+
 export default {
   name: 'App',
+  components: {
+    NavMenu,
+  },
 };
 </script>
 
@@ -19,6 +25,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

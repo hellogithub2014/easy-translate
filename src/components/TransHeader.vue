@@ -52,5 +52,7 @@ export default {
 </script>
 
 <style scoped>
-
+.el-row {
+  margin-top: 10px;
+}
 </style>

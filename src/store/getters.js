@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import deepKeys from '../utils/deepKeys';
+import { MODE } from '../const/store';
 
 export default {
   /**
@@ -45,5 +46,18 @@ export default {
   validToLocaleList(state) {
     const { availableLocales } = state;
     return Object.keys(availableLocales).map(key => availableLocales[key]);
+  },
+
+  /**
+   * 是否为普通模式
+   *
+   * @author liubin.frontend
+   */
+  isNormalMode(state) {
+    return state.mode === MODE.NORMAL;
+  },
+
+  isExpertMode(state) {
+    return state.mode === MODE.EXPERT;
   },
 };

@@ -5,6 +5,7 @@ import mutations from './mutations';
 import actions from './actions';
 import getters from './getters';
 import apiService from '../utils/api-service';
+import { MODE } from '../const/store';
 
 Vue.use(Vuex);
 
@@ -21,6 +22,7 @@ const store = new Vuex.Store({
     },
     fromLocale: 'zh',
     toLocale: 'en',
+    mode: MODE.NORMAL,
   },
   getters,
   mutations,
