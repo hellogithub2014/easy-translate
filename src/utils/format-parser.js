@@ -210,13 +210,54 @@ export default {
    *
    * @author liubin.frontend
    * @param { {path:string,pluralProperty?:{plural:string,count:string},tools:any[]}[] } transItems 词条列表
-   * @param { {plural:string,indexes:number[]} } pluralRecordCache 记录每一个plural被分散到整个transItems中的哪些索引
+   * @param { {plural:string,indexes:number[]} } pluralRecordCache 记录每一个plural被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
    */
   mergeTransItems(transItems, pluralRecordCache) {
+    const mergedTransItems = transItems.slice();
+    const itemsNeedDelete = []; // 所以需要被删除的transitem索引
+    /**
+     * 思路： pluralRecordCache会记录每个单复数词条p被分散到整个列表的哪些位置，
+     * 应该来说会被拆分成3条翻译记录，分别是：为0时的纯文本翻译text0、为1时的纯文本翻译text1、other时的(可能带插值)的文本text_other。
+     * 我们需要把这3条翻译整合成一条，最终的格式会是{p, plural, =0{text0} =1{text1} other{text_other} }
+     */
     Object.keys(pluralRecordCache).forEach((plural) => {
+      // indexes的元素应该是连续的，并且
+      // indexes[0]为zero对应的拆分词条、indexes[1]为one对应的拆分词条、indexes[2]为other对应的拆分词条
       const indexes = pluralRecordCache[plural];
       const splitedPluralTransItems = indexes.map(index => transItems[index]); // 单复数词条被打散的后的纯文本词条
-      const zero = splitedPluralTransItems.find(item => item.pluralProperty.count === '=0');
+      const zeroTransItem = splitedPluralTransItems[0];
+      const oneTransItem = splitedPluralTransItems[1];
+      const otherTransItem = splitedPluralTransItems[2];
+
+      const zeroCombinedTextOfAllTools = this.parseToolsToPlainText(zeroTransItem.tools); // 得到整个翻译词条的翻译文本
+      const oneCombinedTextOfAllTools = this.parseToolsToPlainText(oneTransItem.tools);
+      const otherCombinedTextOfAllTools = this.parseToolsToPlainText(otherTransItem.tools);
+
+      const combinedPluralTool = translateTool.generatePluralTool({
+        plural,
+        zero: zeroCombinedTextOfAllTools,
+        one: oneCombinedTextOfAllTools,
+        other: otherCombinedTextOfAllTools,
+        composeText: composeTextUtil.pluralTool(plural, zeroCombinedTextOfAllTools, oneCombinedTextOfAllTools, otherCombinedTextOfAllTools),
+      });
+
+      const mergedTransItem = {
+        path: zeroTransItem.path,
+        pluralProperty: null,
+        tools: [combinedPluralTool],
+      };
+
+      itemsNeedDelete.push({
+        indexes, // 需要被删掉的item对应的索引
+        mergedTransItem, // 删除这些items时，再在那里塞进去的合并后item
+      });
     });
+
+    itemsNeedDelete.sort((left, right) => right.indexes[0] - left.indexes[0]); // 降序,会改变原数组
+    itemsNeedDelete.forEach(item => mergedTransItems.splice(item.indexes[0], 3, item.mergedTransItem)); // 删掉拆分的3个再塞入合并的那个
+  },
+
+  parseToolsToPlainText(tools) {
+    return tools.reduce((result, tool) => result + tool.composeText, '');
   },
 };

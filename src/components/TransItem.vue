@@ -190,7 +190,7 @@ export default {
 
     // 组合所有tool的composeText
     composeAllToolText() {
-      return this.toolsOfToText.reduce((result, cur) => result + cur.value.composeText, '');
+      return formatParser.parserToolsToPlainText(this.toolsOfToText);
     },
 
     /** 更改store中的目标翻译文本  */
