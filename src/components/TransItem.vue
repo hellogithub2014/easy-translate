@@ -34,7 +34,7 @@
           :locale="fromLocale"
         ></trans-item-preview>
 
-        <p v-if="isNormalMode">{{fromText}}</p>
+        <p v-if="isNormalMode">{{composedTextOfFromTools}}</p>
       </el-col>
       <!-- 右列可操作翻译文本 -->
       <el-col :span="12" :class="{'space-between':isExpertMode, 'center-middle':isNormalMode }">
@@ -63,7 +63,7 @@
 
         <el-input
           v-if="isNormalMode"
-          v-model="toText"
+          v-model="composedTextOfToTools"
           type="textarea"
           :rows="3"
           :cols="10"
@@ -104,14 +104,21 @@ export default {
       type: String,
       required: true,
     },
+    pluralProperty: {
+      type: Object,
+      default: () => ({}),
+    },
+    toolsOfFromText: {
+      type: Array,
+      required: true,
+    },
+    toolsOfToText: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
-    return {
-      showPreview: false,
-      // normalMode下的一些属性，如单复数词条会拆成3条，插值变量会使用掩码字符代替
-      normalModeProperty: {},
-      toolsOfToText: [],
-    };
+    return {};
   },
   computed: {
     ...mapState({
@@ -125,26 +132,19 @@ export default {
     toText() {
       return this.getTextByPath(this.toLocale, this.path);
     },
-    toolsOfFromText() {
-      return formatParser.parseTranslateTools(this.fromText, true);
+    // 所有来源tools的合成composeText
+    composedTextOfFromTools() {
+      return formatParser.parseToolsToPlainText(this.toolsOfFromText);
     },
-  },
-  watch: {
-    toLocale() {
-      this.toolsOfToText = formatParser.parseTranslateTools(this.toText);
+    // 所有目标tools的合成composeText
+    composedTextOfToTools() {
+      return formatParser.parseToolsToPlainText(this.toolsOfToText);
     },
-  },
-  mounted() {
-    this.toolsOfToText = formatParser.parseTranslateTools(this.toText);
   },
   methods: {
     ...mapMutations({
       updateText: TYPES.UPDATE_TEXT,
     }),
-
-    togglePreview() {
-      this.showPreview = !this.showPreview;
-    },
 
     checkFormat() {
       const { toLocale, toText, formatterWithToLocale } = this;
@@ -186,11 +186,6 @@ export default {
         },
       });
       this.updateToText(this.composeAllToolText());
-    },
-
-    // 组合所有tool的composeText
-    composeAllToolText() {
-      return formatParser.parserToolsToPlainText(this.toolsOfToText);
     },
 
     /** 更改store中的目标翻译文本  */

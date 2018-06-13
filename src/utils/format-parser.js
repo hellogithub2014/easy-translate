@@ -127,6 +127,7 @@ export default {
   },
   /**
    * 将含有单复数的词条拆分为3个独立的纯文本词条。
+   * 这里会假定：如果来源文本含有单复数，那么目标文本也是含有单复数的
    *
    * @example
    * "You have {n, plural, =0{no messages} =1{ 1 message} other{# messages}}."  =>
@@ -135,49 +136,85 @@ export default {
    *  "You have # messages"
    *
    * @author liubin.frontend
-   * @param {any[]} tools
+   * @param {{path:string,toolsOfFromText:any[], toolsOfToText:any[]}} transItem 词条
    * @returns
    */
-  trySplitPluralTools(tools) {
-    const pluralToolIndex = this.findPluralToolIndex(tools);
+  trySplitPluralItem(transItem) {
+    const toolsOfFromText = transItem.toolsOfFromText;
+    const toolsOfToText = transItem.toolsOfToText;
+    const pluralToolIndex = this.findPluralToolIndex(toolsOfFromText);
+
+    // 不是单复数词条
     if (pluralToolIndex === -1) {
-      return [
-        {
-          plural: undefined,
-          tools,
-        },
-      ];
+      return transItem;
     }
 
-    const cloneTools1 = tools.slice();
-    const cloneTools2 = tools.slice();
-    const cloneTools3 = tools.slice();
-    const pluralTool = tools[pluralToolIndex];
-    const splitedPluralTools = this.doSplitPluralTool(pluralTool);
-    cloneTools1[pluralToolIndex] = splitedPluralTools[0];
-    cloneTools2[pluralToolIndex] = splitedPluralTools[1];
-    cloneTools3[pluralToolIndex] = splitedPluralTools[2];
+    // 将一个包含单复数的tools拆分为3个不包含单复数的tools
+    const replacedToolsListOfFromText = this.getReplacedTools(toolsOfFromText, pluralToolIndex);
+    const replacedToolsListOfToText = this.getReplacedTools(toolsOfToText, this.findPluralToolIndex(toolsOfToText));
+    const { plural } = toolsOfFromText[pluralToolIndex].value; // 单复数的变量名
 
+    // 返回拆分后的3个词条，每个词条里已不在包含单复数，只有纯文本或插值
     return [
       {
-        plural: pluralTool.value.plural,
-        count: '=0',
-        tools: cloneTools1,
+        path: transItem.path,
+        pluralProperty: {
+          plural,
+          count: '=0',
+        },
+        toolsOfFromText: replacedToolsListOfFromText[0],
+        toolsOfToText: replacedToolsListOfToText[0],
       },
       {
-        plural: pluralTool.value.plural,
-        count: '=1',
-        tools: cloneTools2,
+        path: transItem.path,
+        pluralProperty: {
+          plural,
+          count: '=1',
+        },
+        toolsOfFromText: replacedToolsListOfFromText[1],
+        toolsOfToText: replacedToolsListOfToText[1],
       },
       {
-        plural: pluralTool.value.plural,
-        count: 'other',
-        tools: cloneTools3,
+        path: transItem.path,
+        pluralProperty: {
+          plural,
+          count: 'other',
+        },
+        toolsOfFromText: replacedToolsListOfFromText[2],
+        toolsOfToText: replacedToolsListOfToText[2],
       },
     ];
   },
+  /**
+   * 将一个包含单复数的tools拆分为3个不包含单复数的tools
+   *
+   * @author liubin.frontend
+   * @param {any[]} tools
+   * @param {number} pluralToolIndex 单复数tool在整个数组中的索引
+   * @returns 3个不包含单复数的tools
+   */
+  getReplacedTools(tools, pluralToolIndex) {
+    const cloneTools1 = tools.slice();
+    const cloneTools2 = tools.slice();
+    const cloneTools3 = tools.slice();
 
-  doSplitPluralTool(pluralTool) {
+    const pluralTool = tools[pluralToolIndex]; // 1个单复数tool
+    const decomposeedPluralTools = this.decomposePluralTool(pluralTool); // 3个不包含单复数的tool
+
+    cloneTools1[pluralToolIndex] = decomposeedPluralTools[0]; // 替换掉里面的单复数tool
+    cloneTools2[pluralToolIndex] = decomposeedPluralTools[1];
+    cloneTools3[pluralToolIndex] = decomposeedPluralTools[2];
+
+    return [cloneTools1, cloneTools2, cloneTools3];
+  },
+  /**
+   * 分解一个PluralTool，拿到其中=0的文本、=1的文本以及other文本，最后组成3个纯文本tool
+   *
+   * @author liubin.frontend
+   * @param {*} pluralTool
+   * @returns 一个3个元素的纯文本tool数组，第一个包含=0的文本、第二个包含=1的文本， 第三个包含other文本
+   */
+  decomposePluralTool(pluralTool) {
     const { zero, one, other } = pluralTool.value;
 
     return [
@@ -209,7 +246,7 @@ export default {
    * "You have {n, plural, =0{no messages} =1{ 1 message} other{# messages}}."
    *
    * @author liubin.frontend
-   * @param { {path:string,pluralProperty?:{plural:string,count:string},tools:any[]}[] } transItems 词条列表
+   * @param { {path:string,pluralProperty?:{plural:string,count:string},toolsOfFromText:any[], toolsOfToText:any[]}[] } transItems 词条列表
    * @param { {plural:string,indexes:number[]} } pluralRecordCache 记录每一个plural被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
    */
   mergeTransItems(transItems, pluralRecordCache) {
@@ -219,6 +256,8 @@ export default {
      * 思路： pluralRecordCache会记录每个单复数词条p被分散到整个列表的哪些位置，
      * 应该来说会被拆分成3条翻译记录，分别是：为0时的纯文本翻译text0、为1时的纯文本翻译text1、other时的(可能带插值)的文本text_other。
      * 我们需要把这3条翻译整合成一条，最终的格式会是{p, plural, =0{text0} =1{text1} other{text_other} }
+     *
+     * 需要注意的是： 原文本和目标文本会联动的一起拆分、一起合并
      */
     Object.keys(pluralRecordCache).forEach((plural) => {
       // indexes的元素应该是连续的，并且
@@ -228,23 +267,46 @@ export default {
       const zeroTransItem = splitedPluralTransItems[0];
       const oneTransItem = splitedPluralTransItems[1];
       const otherTransItem = splitedPluralTransItems[2];
+      // TODO: 这些逻辑有重复代码，提取到外部
+      // 得到整个翻译词条的源翻译文本
+      const zeroCombinedTextOfFromTextTools = this.parseToolsToPlainText(zeroTransItem.toolsOfFromText); // 整条翻译当做zero的部分
+      const oneCombinedTextOfFromTextTools = this.parseToolsToPlainText(oneTransItem.toolsOfFromText);
+      const otherCombinedTextOfFromTextTools = this.parseToolsToPlainText(otherTransItem.toolsOfFromText);
 
-      const zeroCombinedTextOfAllTools = this.parseToolsToPlainText(zeroTransItem.tools); // 得到整个翻译词条的翻译文本
-      const oneCombinedTextOfAllTools = this.parseToolsToPlainText(oneTransItem.tools);
-      const otherCombinedTextOfAllTools = this.parseToolsToPlainText(otherTransItem.tools);
+      // 得到整个翻译词条的目标翻译文本
+      const zeroCombinedTextOfToTextTools = this.parseToolsToPlainText(zeroTransItem.toolsOfToText);
+      const oneCombinedTextOfToTextTools = this.parseToolsToPlainText(oneTransItem.toolsOfToText);
+      const otherCombinedTextOfToTextTools = this.parseToolsToPlainText(otherTransItem.toolsOfToText);
 
-      const combinedPluralTool = translateTool.generatePluralTool({
+      // 拆分的3个来源文本tools，合并成一个大的plural tool
+      const combinedPluralToolOfFromText = translateTool.generatePluralTool({
         plural,
-        zero: zeroCombinedTextOfAllTools,
-        one: oneCombinedTextOfAllTools,
-        other: otherCombinedTextOfAllTools,
-        composeText: composeTextUtil.pluralTool(plural, zeroCombinedTextOfAllTools, oneCombinedTextOfAllTools, otherCombinedTextOfAllTools),
+        zero: zeroCombinedTextOfFromTextTools,
+        one: oneCombinedTextOfFromTextTools,
+        other: otherCombinedTextOfFromTextTools,
+        composeText: composeTextUtil.pluralTool(
+          plural,
+          zeroCombinedTextOfFromTextTools,
+          oneCombinedTextOfFromTextTools,
+          otherCombinedTextOfFromTextTools,
+        ),
       });
 
+      // 拆分的3个目标文本tools，合并成一个大的plural tool
+      const combinedPluralToolOfToText = translateTool.generatePluralTool({
+        plural,
+        zero: zeroCombinedTextOfToTextTools,
+        one: oneCombinedTextOfToTextTools,
+        other: otherCombinedTextOfToTextTools,
+        composeText: composeTextUtil.pluralTool(plural, zeroCombinedTextOfToTextTools, oneCombinedTextOfToTextTools, otherCombinedTextOfToTextTools),
+      });
+
+      // 3个transitem合并后的一个transitem
       const mergedTransItem = {
         path: zeroTransItem.path,
         pluralProperty: null,
-        tools: [combinedPluralTool],
+        toolsOfFromText: [combinedPluralToolOfFromText],
+        toolsOfToText: [combinedPluralToolOfToText],
       };
 
       itemsNeedDelete.push({
@@ -258,6 +320,6 @@ export default {
   },
 
   parseToolsToPlainText(tools) {
-    return tools.reduce((result, tool) => result + tool.composeText, '');
+    return tools.reduce((result, tool) => result + tool.value.composeText, '');
   },
 };
