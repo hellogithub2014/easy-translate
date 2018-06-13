@@ -247,7 +247,7 @@ export default {
    *
    * @author liubin.frontend
    * @param { {path:string,pluralProperty?:{plural:string,count:string},toolsOfFromText:any[], toolsOfToText:any[]}[] } transItems 词条列表
-   * @param { {plural:string,indexes:number[]} } pluralRecordCache 记录每一个plural被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
+   * @param { {plural:string,indexes:number[]} } pluralRecordCache 记录每一个单复数词条被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
    */
   mergeTransItems(transItems, pluralRecordCache) {
     const mergedTransItems = transItems.slice();
@@ -259,10 +259,10 @@ export default {
      *
      * 需要注意的是： 原文本和目标文本会联动的一起拆分、一起合并
      */
-    Object.keys(pluralRecordCache).forEach((plural) => {
+    Object.keys(pluralRecordCache).forEach((path) => {
       // indexes的元素应该是连续的，并且
       // indexes[0]为zero对应的拆分词条、indexes[1]为one对应的拆分词条、indexes[2]为other对应的拆分词条
-      const indexes = pluralRecordCache[plural];
+      const { indexes, plural } = pluralRecordCache[path];
       const splitedPluralTransItems = indexes.map(index => transItems[index]); // 单复数词条被打散的后的纯文本词条
       const zeroTransItem = splitedPluralTransItems[0];
       const oneTransItem = splitedPluralTransItems[1];

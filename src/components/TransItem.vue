@@ -6,70 +6,23 @@
         <span> ###id</span>
       </el-col>
       <el-col :span="12" class="center-middle">
-        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addPlainTextTool">纯文本</el-button>
-        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addVariableTool">插值</el-button>
-        <el-button type="primary" v-if="isExpertMode" size="mini" @click="addPluralTool">单复数</el-button>
-        <el-button type="success" v-if="isExpertMode" size="mini" @click="checkFormat">校验格式</el-button>
       </el-col>
     </el-row>
 
     <!-- 第二行，翻译区域 -->
     <el-row class="translate-wrapper">
       <!-- 左列只读基础文本 -->
-      <el-col :span="12" :class="{'space-between':isExpertMode, 'center-middle':isNormalMode }">
-        <div class="translate-area" v-if="isExpertMode">
-          <span  class="component-wrapper" v-for="(tool,index) in toolsOfFromText" :key="index">
-              <component
-                :is="tool.component"
-                :value="tool.value"
-                :locale="fromLocale"
-                :read-only="tool.value.readonly">
-              </component>
-            </span>
-        </div>
-        <!-- 预览 -->
-        <trans-item-preview
-          v-if="isExpertMode"
-          :tools="toolsOfFromText"
-          :locale="fromLocale"
-        ></trans-item-preview>
-
-        <p v-if="isNormalMode">{{composedTextOfFromTools}}</p>
+      <el-col :span="12" class="center-middle">
+        <p>{{composedTextOfFromTools}}</p>
       </el-col>
       <!-- 右列可操作翻译文本 -->
-      <el-col :span="12" :class="{'space-between':isExpertMode, 'center-middle':isNormalMode }">
-        <div class="translate-area" v-if="isExpertMode">
-          <span
-            class="component-wrapper"
-            v-for="(tool,index) in toolsOfToText"
-            :key="index">
-            <span class="cross" @click="removeTool(index)">x</span>
-            <component
-              :is="tool.component"
-              :value="tool.value"
-              :locale="toLocale"
-              @cancel="removeTool(index)"
-              @add="addToText"
-              @update="changeToText(index, $event)">
-            </component>
-          </span>
-        </div>
-          <!-- 预览 -->
-        <trans-item-preview
-          v-if="isExpertMode"
-          :tools="toolsOfToText"
-          :locale="toLocale"
-        ></trans-item-preview>
-
+      <el-col :span="12" class="center-middle">
         <el-input
-          v-if="isNormalMode"
-          v-model="composedTextOfToTools"
+          :value="composedTextOfToTools"
+          @change="updateToText"
           type="textarea"
           :rows="3"
-          :cols="10"
-          clearable
         ></el-input>
-
       </el-col>
     </el-row>
 
@@ -77,36 +30,22 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
-import formatterMixin from '../mixins/formatterMixin';
-
-import PluralTool from './tools/PluralTool';
-import VariableTool from './tools/VariableTool';
-import PlainTextTool from './tools/PlainTextTool';
-import TransItemPreview from './TransItemPreview';
-
+import { mapState, mapMutations } from 'vuex';
 import TYPES from '../store/mutation-types';
-
+import TOOL_NAME from '../const/tool-name';
 import formatParser from '../utils/format-parser';
-import translateTool from '../utils/translate-tool';
 
 export default {
   name: 'trans-item',
-  mixins: [formatterMixin],
-  components: {
-    PluralTool,
-    VariableTool,
-    PlainTextTool,
-    TransItemPreview,
-  },
   props: {
     path: {
       type: String,
       required: true,
     },
-    pluralProperty: {
-      type: Object,
-      default: () => ({}),
+    // 是否为某一单复数词条拆分后的词条
+    isOneOfDecomposedPlural: {
+      type: Boolean,
+      default: false,
     },
     toolsOfFromText: {
       type: Array,
@@ -122,16 +61,8 @@ export default {
   },
   computed: {
     ...mapState({
-      fromLocale: 'fromLocale',
       toLocale: 'toLocale',
     }),
-    ...mapGetters(['getTextByPath', 'isNormalMode', 'isExpertMode']),
-    fromText() {
-      return this.getTextByPath(this.fromLocale, this.path);
-    },
-    toText() {
-      return this.getTextByPath(this.toLocale, this.path);
-    },
     // 所有来源tools的合成composeText
     composedTextOfFromTools() {
       return formatParser.parseToolsToPlainText(this.toolsOfFromText);
@@ -140,62 +71,34 @@ export default {
     composedTextOfToTools() {
       return formatParser.parseToolsToPlainText(this.toolsOfToText);
     },
+    // 是否包含插值tool
+    isContainsVariableTool() {
+      return this.toolsOfToText.includes(tool => tool.component === TOOL_NAME.VARIABLE_TOOL);
+    },
   },
   methods: {
     ...mapMutations({
       updateText: TYPES.UPDATE_TEXT,
     }),
 
-    checkFormat() {
-      const { toLocale, toText, formatterWithToLocale } = this;
-      try {
-        formatterWithToLocale.compile(toText, toLocale);
-        this.$message.success('格式正确');
-      } catch (e) {
-        this.$message.error(`格式错误,${e}`);
-      }
-    },
-
-    addPlainTextTool() {
-      this.toolsOfToText.push(translateTool.generatePlainTextTool());
-    },
-    /** 翻译文本中追加插值  */
-    addVariableTool() {
-      this.toolsOfToText.push(translateTool.generateVaribaleTool({ showDialog: true, isNew: true }));
-    },
-    /** 翻译文本中追加单复数  */
-    addPluralTool() {
-      this.toolsOfToText.push(translateTool.generatePluralTool({ showDialog: true, isNew: true }));
-    },
-
-    removeTool(index) {
-      this.toolsOfToText.splice(index, 1);
-      this.updateToText(this.composeAllToolText());
-    },
-
-    addToText(eventParam) {
-      this.changeToText(this.toolsOfToText.length - 1, eventParam);
-    },
-
-    changeToText(index, eventParam) {
-      this.toolsOfToText.splice(index, 1, {
-        ...this.toolsOfToText[index],
-        value: {
-          ...this.toolsOfToText[index].value,
-          ...eventParam,
-        },
-      });
-      this.updateToText(this.composeAllToolText());
-    },
-
     /** 更改store中的目标翻译文本  */
     updateToText(newText) {
+      // 如果当前词条只是拆分后单复数词条的其中一条，那么需要父组件才能知道怎么更新
+      // TODO: 考虑#的处理
+      if (this.isOneOfDecomposedPlural) {
+        this.$emit('update-plural-text', newText);
+        return;
+      }
+
+      // 如果只是纯文本，直接更新即可。 TODO: 包含插值tool的更新
+      // if (!this.isContainsVariableTool) {
       this.updateText({
         locale: this.toLocale,
         newText,
         path: this.path,
       });
     },
+    // },
   },
 };
 </script>
