@@ -6,6 +6,14 @@
         <span> ###id</span>
       </el-col>
       <el-col :span="12" class="center-middle">
+        <el-popover
+          placement="top-start"
+          width="200"
+          trigger="hover"
+          v-show="showEscapeHint"
+          :content="escapeHint">
+          <el-button  size="mini" slot="reference">遇到<strong>{}</strong>报错？</el-button>
+        </el-popover>
       </el-col>
     </el-row>
 
@@ -34,9 +42,11 @@ import { mapState, mapMutations } from 'vuex';
 import TYPES from '../store/mutation-types';
 import TOOL_NAME from '../const/tool-name';
 import formatParser from '../utils/format-parser';
+import formatterMixin from '../mixins/formatterMixin';
 
 export default {
   name: 'trans-item',
+  mixins: [formatterMixin],
   props: {
     path: {
       type: String,
@@ -57,7 +67,9 @@ export default {
     },
   },
   data() {
-    return {};
+    return {
+      showEscapeHint: false,
+    };
   },
   computed: {
     ...mapState({
@@ -75,6 +87,11 @@ export default {
     isContainsVariableTool() {
       return this.toolsOfToText.includes(tool => tool.component === TOOL_NAME.VARIABLE_TOOL);
     },
+    escapeHint() {
+      return `『{』和『}』是保留的字符，通常用于表示插值或者其他更高级的格式。
+        如果确实想输入普通的『{』或『}』，可以在它们的两边都加上单引号'，
+        例如"This is a '{' " 最后会被自动转成 "This is a { "`;
+    },
   },
   methods: {
     ...mapMutations({
@@ -83,22 +100,30 @@ export default {
 
     /** 更改store中的目标翻译文本  */
     updateToText(newText) {
+      // 校验一下格式
+      const { error, msg, char } = formatParser.checkFormat(this.formatterWithToLocale, newText, this.toLocale);
+      if (error) {
+        this.$message.error(msg);
+        if (char && /{|}/.test(char)) {
+          this.showEscapeHint = true; // 显示转义提示
+        }
+        return;
+      }
+      this.showEscapeHint = false;
+
       // 如果当前词条只是拆分后单复数词条的其中一条，那么需要父组件才能知道怎么更新
-      // TODO: 考虑#的处理
       if (this.isOneOfDecomposedPlural) {
         this.$emit('update-plural-text', newText);
         return;
       }
 
-      // 如果只是纯文本，直接更新即可。 TODO: 包含插值tool的更新
-      // if (!this.isContainsVariableTool) {
+      // 自己直接就可以更新store
       this.updateText({
         locale: this.toLocale,
         newText,
         path: this.path,
       });
     },
-    // },
   },
 };
 </script>

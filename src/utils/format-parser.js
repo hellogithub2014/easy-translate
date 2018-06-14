@@ -116,6 +116,41 @@ export default {
   },
 
   /**
+   * 校验词条格式是否符合ICU规范
+   *
+   * @author liubin.frontend
+   * @param {any} formatter
+   * @param {string} text 待校验的文本
+   * @param {string} locale 文本使用的语言
+   * @returns {{err:any,msg:string} 一个对象，包含error和msg，如果格式合法，error为null，否之为具体错误信息
+   */
+  checkFormat(formatter, text, locale) {
+    try {
+      formatter.compile(text, locale);
+      return {
+        error: null,
+        msg: '格式正确',
+      };
+    } catch (err) {
+      const { found, location = {} } = err;
+      const { start, end } = location;
+      let msg = '格式错误';
+      if (start && end) {
+        msg += `，第${start.line}行第${start.column}列 ~ 第${end.line}行第${end.column}列`;
+      }
+      if (found) {
+        msg += `,错误的字符： ${found}`;
+      }
+
+      return {
+        error: err,
+        char: found,
+        msg,
+      };
+    }
+  },
+
+  /**
    * 查找是否存在plural-tool
    *
    * @author liubin.frontend
