@@ -27,10 +27,12 @@
       <el-col :span="12" class="center-middle">
         <el-input
           :value="composedTextOfToTools"
+          @focus="getMousePosition"
           @change="updateToText"
           type="textarea"
           :rows="3"
         ></el-input>
+        <!-- <div>{{selectionRange}}</div> -->
       </el-col>
     </el-row>
 
@@ -69,6 +71,8 @@ export default {
   data() {
     return {
       showEscapeHint: false,
+      mousePositionStart: 1,
+      mousePositionEnd: 1,
     };
   },
   computed: {
@@ -92,6 +96,13 @@ export default {
         如果确实想输入普通的『{』或『}』，可以在它们的两边都加上单引号'，
         例如"This is a '{' " 最后会被自动转成 "This is a { "`;
     },
+    selectionRange() {
+      const { mousePositionStart, mousePositionEnd } = this;
+      if (mousePositionStart === mousePositionEnd) {
+        return `第${mousePositionStart}列`;
+      }
+      return `列${mousePositionEnd},已选择${mousePositionEnd - mousePositionStart}`;
+    },
   },
   methods: {
     ...mapMutations({
@@ -107,9 +118,9 @@ export default {
         if (char && /{|}/.test(char)) {
           this.showEscapeHint = true; // 显示转义提示
         }
-        return;
+      } else {
+        this.showEscapeHint = false;
       }
-      this.showEscapeHint = false;
 
       // 如果当前词条只是拆分后单复数词条的其中一条，那么需要父组件才能知道怎么更新
       if (this.isOneOfDecomposedPlural) {
@@ -123,6 +134,14 @@ export default {
         newText,
         path: this.path,
       });
+    },
+
+    getMousePosition() {
+      const selection = getSelection();
+      // selection.removeAllRanges();
+      const { startOffset, endOffset } = selection.getRangeAt(0);
+      this.mousePositionStart = startOffset;
+      this.mousePositionEnd = endOffset;
     },
   },
 };
