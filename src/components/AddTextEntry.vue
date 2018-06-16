@@ -29,10 +29,7 @@
         </el-col>
       </el-row>
 
-      <el-row>
-        <!-- 上传场景 -->
-        <div :style="sceneStyle" class="scene-uploader" @paste="tryUploadImage">上传图片</div>
-      </el-row>
+      <scene-uploader></scene-uploader>
 
       <!-- 内层的二次确认弹窗 -->
       <el-dialog
@@ -67,9 +64,13 @@
 import _ from 'lodash';
 import { mapGetters, mapActions } from 'vuex';
 import TYPES from '../store/mutation-types';
+import SceneUploader from './SceneUploader';
 
 export default {
   name: 'add-text-entry',
+  components: {
+    SceneUploader,
+  },
   data() {
     return {
       showDialog: false,
@@ -81,7 +82,6 @@ export default {
         },
       ],
       allNoneExistPaths: [],
-      sceneStyle: {},
     };
   },
   computed: {
@@ -144,38 +144,6 @@ export default {
       this.showDoubleCheckDialog = false;
       this.doBathcAddEntry();
     },
-    tryUploadImage(pasteEvent) {
-      const clipboardData = pasteEvent.clipboardData;
-      const { items } = clipboardData;
-      const IMG_TYPES = ['png', 'jpg', 'jpeg', 'gif'].map(type => `image/${type}`);
-      if (!items || !items.length) {
-        return; // 粘贴板没有内容
-      }
-
-      // items不是Array对象，无法直接用forEach迭代
-      [...items].forEach((item) => {
-        const { kind, type } = item;
-        if (kind === 'file' && IMG_TYPES.includes(type)) {
-          this.doUploadImage(item.getAsFile());
-        }
-        // 处理粘贴链接的情况
-        // else if()
-      });
-    },
-    doUploadImage(imgFile) {
-      const that = this;
-      const fr = new FileReader();
-      fr.onload = (ev) => {
-        const src = ev.target.result;
-        that.sceneStyle = Object.assign({}, that.sceneStyle, {
-          backgroundImage: `url(${src})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-        });
-      };
-      fr.onerror = () => that.$message.error('读取图片失败');
-      fr.readAsDataURL(imgFile);
-    },
   },
 };
 </script>
@@ -189,9 +157,5 @@ export default {
 }
 .entry-area .el-textarea {
   width: calc(100% - 100px);
-}
-.scene-uploader {
-  height: 200px;
-  border: 1px solid red;
 }
 </style>

@@ -7,6 +7,10 @@ import App from './App';
 import router from './router';
 import store from './store';
 
+const VueCookie = require('vue-cookie');
+
+// Tell Vue to use the plugin
+Vue.use(VueCookie);
 Vue.config.productionTip = false;
 Vue.use(ElementUI); // TODO: 按需引入 http://element-cn.eleme.io/#/zh-CN/component/quickstart
 
