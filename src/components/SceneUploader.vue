@@ -5,11 +5,11 @@
       <!-- 上传区域 -->
       <el-col :span="8">
         <div class="upload-wrapper" @paste="pasteImage">
-          <p>tips: 点击这里的空白处，可以直接从粘贴板上传图片</p>
-          <!--
-            1. FileData为目前图片后端指定的name
-            2. 当前后端只支持一次上传单张图片
-          -->
+          <div style="height:30px;">
+            <p v-if="!uploadingImageFromPaste">tips: 点击这里的空白处，可以直接从粘贴板上传图片</p>
+            <el-progress v-else :percentage="uploadingImageFromPaste.percentage | toInt"></el-progress>
+          </div>
+
           <el-upload
             drag
             multiple
@@ -25,6 +25,7 @@
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
           </el-upload>
+          <!-- 进度条 -->
           <el-progress
             v-for="(item,index) in uploadingImagesSelectOrDrag"
             :percentage="item.percentage | toInt"
@@ -50,7 +51,7 @@
       append-to-body
       width="60%"
     >
-    <div v-loading="shouldShowPreviewLoading" style="height:100%;">
+    <div v-loading="shouldShowPreviewLoading">
       <img width="100%" :src="curPreviewImageUrl" @load="finishLoadingPreviewImage" >
     </div>
     </el-dialog>
@@ -64,11 +65,11 @@ export default {
   name: 'scene-uploader',
   data() {
     return {
-      imagesFromPaste: [],
-      imagesFromSelectOrDrag: [],
-      uploadingImagesFromPaste: [],
-      uploadingImagesSelectOrDrag: [],
-      showPreviewDialog: false,
+      imagesFromPaste: [], // 所有从粘贴板已上传完成的图片
+      imagesFromSelectOrDrag: [], // 所有拖拽或选择的已上传完成的图片
+      uploadingImageFromPaste: null, // 粘贴板中正在上传的图片，一次只能弄一个图片，故此属性用对象即可
+      uploadingImagesSelectOrDrag: [], // 拖拽或选择的正在上传的图片数组，均可以一次上传多个，需要用数组
+      showPreviewDialog: false, // 是否显示预览图片弹窗
       curPreviewImageUrl: '', // 当前正在预览的图片url
       imagePreviewCache: {}, //  缓存所有待预览的图片。 键：图片url、值complete：是否已加载好
     };
@@ -145,7 +146,7 @@ export default {
       }
 
       // items不是Array对象，无法直接用forEach迭代
-      [...items].forEach(item => {
+      [...items].forEach((item) => {
         const { kind, type } = item;
         if (kind === 'file' && this.imageTypes.includes(type)) {
           // 手动调用api上传，成功后再把对象push
@@ -161,8 +162,15 @@ export default {
       const options = {
         ...this.defaultUploadOptions,
         file: imgFile,
-        onSuccess: res => {
+        onProgress: (res) => {
+          this.defaultUploadOptions.onProgress(res);
+          this.uploadingImageFromPaste = {
+            percentage: res.percent,
+          };
+        },
+        onSuccess: (res) => {
           this.defaultUploadOptions.onSuccess(res);
+          this.uploadingImageFromPaste = null;
           this.imagesFromPaste.push({
             response: res,
             name: imgFile.name,
