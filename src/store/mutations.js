@@ -1,12 +1,11 @@
 import TYPES from './mutation-types';
-import setPathValue from '../utils/setPathValue';
 
 export default {
   [TYPES.UPDATE_TEXT](state, { locale, path, newText }) {
     const { messages } = state;
-    const pathValue = messages[locale][path];
+    const { text: pathValue } = messages[locale][path];
     if (messages[locale] && pathValue !== undefined && pathValue !== null) {
-      messages[locale][path] = newText;
+      messages[locale][path].text = newText;
     }
   },
   [TYPES.UPDATE_TO_LOCALE](state, newToLocale) {
@@ -19,9 +18,15 @@ export default {
       [newLocale]: message,
     };
   },
-  [TYPES.ADD_ENTRY](state, { locale, path, text }) {
+  [TYPES.ADD_ENTRY](state, { locale, path, text, scene }) {
     const localeMessage = state.messages[locale];
-    setPathValue(localeMessage, path, text);
+    state.messages[locale] = {
+      ...localeMessage,
+      [path]: {
+        text,
+        scene,
+      },
+    };
   },
   [TYPES.UPDATE_MODE](state, mode) {
     state.mode = mode;

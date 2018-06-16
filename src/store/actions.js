@@ -30,8 +30,8 @@ export default {
       if (!state.messages[lo]) {
         return; // 目标语言的词条还没有获取到本地
       }
-      entryList.forEach(({ path, text }) => {
-        commit(TYPES.ADD_ENTRY, { locale: lo, path, text });
+      entryList.forEach(({ path, text, scene }) => {
+        commit(TYPES.ADD_ENTRY, { locale: lo, path, text, scene });
       });
     });
   },

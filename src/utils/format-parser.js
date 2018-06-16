@@ -171,7 +171,7 @@ export default {
    *  "You have # messages"
    *
    * @author liubin.frontend
-   * @param {{path:string,toolsOfFromText:any[], toolsOfToText:any[]}} transItem 词条
+   * @param {{path:string,toolsOfFromText:any[], toolsOfToText:any[],scene:string[]}} transItem 词条
    * @returns
    */
   trySplitPluralItem(transItem) {
@@ -192,7 +192,7 @@ export default {
     // 返回拆分后的3个词条，每个词条里已不在包含单复数，只有纯文本或插值
     return [
       {
-        path: transItem.path,
+        ...transItem,
         pluralProperty: {
           plural,
           count: '=0',
@@ -201,7 +201,7 @@ export default {
         toolsOfToText: replacedToolsListOfToText[0],
       },
       {
-        path: transItem.path,
+        ...transItem,
         pluralProperty: {
           plural,
           count: '=1',
@@ -210,7 +210,7 @@ export default {
         toolsOfToText: replacedToolsListOfToText[1],
       },
       {
-        path: transItem.path,
+        ...transItem,
         pluralProperty: {
           plural,
           count: 'other',

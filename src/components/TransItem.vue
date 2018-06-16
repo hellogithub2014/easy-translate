@@ -1,5 +1,6 @@
 <template>
   <div class="trans-item">
+
     <!-- 第一行，一些状态和工具 -->
     <el-row class="tools-wrapper">
       <el-col :span="12" class="center-middle">
@@ -18,24 +19,32 @@
     </el-row>
 
     <!-- 第二行，翻译区域 -->
-    <el-row class="translate-wrapper">
-      <!-- 左列只读基础文本 -->
-      <el-col :span="12" class="center-middle">
-        <p>{{composedTextOfFromTools}}</p>
-      </el-col>
-      <!-- 右列可操作翻译文本 -->
-      <el-col :span="12" class="center-middle">
-        <el-input
-          :value="composedTextOfToTools"
-          @focus="getMousePosition"
-          @change="updateToText"
-          type="textarea"
-          :rows="3"
-        ></el-input>
-        <!-- <div>{{selectionRange}}</div> -->
-      </el-col>
-    </el-row>
-
+    <el-popover
+      placement="bottom"
+      trigger="click"
+      width="800"
+      title="词条场景"
+      :disabled="sceneImages.length===0"
+    >
+      <!-- 场景提示器 -->
+      <scene-hinter :scene-images="sceneImages"></scene-hinter>
+      <el-row class="translate-wrapper" slot="reference">
+        <!-- 左列只读基础文本 -->
+        <el-col :span="12" class="center-middle">
+          <p>{{composedTextOfFromTools}}</p>
+        </el-col>
+        <!-- 右列可操作翻译文本 -->
+        <el-col :span="12" class="center-middle">
+          <el-input
+            :value="composedTextOfToTools"
+            @change="updateToText"
+            type="textarea"
+            :rows="3"
+          ></el-input>
+          <!-- <div>{{selectionRange}}</div> -->
+        </el-col>
+      </el-row>
+    </el-popover>
   </div>
 </template>
 
@@ -45,10 +54,14 @@ import TYPES from '../store/mutation-types';
 import TOOL_NAME from '../const/tool-name';
 import formatParser from '../utils/format-parser';
 import formatterMixin from '../mixins/formatterMixin';
+import SceneHinter from './SceneHinter';
 
 export default {
   name: 'trans-item',
   mixins: [formatterMixin],
+  components: {
+    SceneHinter,
+  },
   props: {
     path: {
       type: String,
@@ -66,6 +79,11 @@ export default {
     toolsOfToText: {
       type: Array,
       required: true,
+    },
+    // 场景图片
+    sceneImages: {
+      type: Array,
+      default: () => [], // TODO: remove
     },
   },
   data() {
@@ -135,7 +153,9 @@ export default {
         path: this.path,
       });
     },
-
+    /**
+     * TODO: 获取光标在文本框哪一列
+     */
     getMousePosition() {
       const selection = getSelection();
       // selection.removeAllRanges();

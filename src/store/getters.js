@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import deepKeys from '../utils/deepKeys';
 import { MODE } from '../const/store';
 
 export default {
@@ -11,7 +10,7 @@ export default {
    * @returns 例如['a', 'b']之类的数组
    */
   textPathList(state) {
-    return locale => deepKeys(state.messages[locale]);
+    return locale => Object.keys(state.messages[locale]);
   },
 
   /**
@@ -33,7 +32,18 @@ export default {
    * @returns
    */
   getTextByPath(state) {
-    return (locale, path) => _.get(state.messages[locale], path);
+    return (locale, path) => _.get(state.messages[locale], path).text;
+  },
+
+  /**
+   * 获取词条场景图片
+   *
+   * @author liubin.frontend
+   * @param {*} state
+   * @returns
+   */
+  getTextScene(state) {
+    return (locale, path) => _.get(state.messages[locale], path).scene;
   },
 
   /**

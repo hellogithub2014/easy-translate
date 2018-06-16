@@ -5,6 +5,7 @@
       :tools-of-from-text="transItem.toolsOfFromText"
       :tools-of-to-text="transItem.toolsOfToText"
       :isOneOfDecomposedPlural="!!transItem.pluralProperty"
+      :scene-images="transItem.scene"
       :key="index"
       @update-plural-text="updatePluralText(index,$event)"
       ></trans-item>
@@ -34,7 +35,7 @@ export default {
       fromLocale: 'fromLocale',
       toLocale: 'toLocale',
     }),
-    ...mapGetters(['textPathList', 'getTextByPath']),
+    ...mapGetters(['textPathList', 'getTextByPath', 'getTextScene']),
     pathList() {
       return this.textPathList(this.fromLocale); // 以左侧的源文本为准
     },
@@ -44,8 +45,12 @@ export default {
         const toText = this.getTextByPath(this.toLocale, path);
         const toolsOfFromText = formatParser.parseTranslateTools(fromText, true);
         const toolsOfToText = formatParser.parseTranslateTools(toText);
+        // 两种语言的所有场景去重
+        const sceneSet = new Set([...this.getTextScene(this.fromLocale, path), ...this.getTextScene(this.toLocale, path)]);
+
         return {
           path,
+          scene: [...sceneSet],
           toolsOfFromText,
           toolsOfToText,
         };

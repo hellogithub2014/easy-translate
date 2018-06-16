@@ -12,7 +12,10 @@ function langListToObject(list) {
   return list.reduce(
     (result, item) =>
       Object.assign(result, {
-        [item.path]: item.value,
+        [item.path]: {
+          text: item.value,
+          scene: item.scene,
+        },
       }),
     {},
   );
