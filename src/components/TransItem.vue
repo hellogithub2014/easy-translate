@@ -24,10 +24,10 @@
       trigger="click"
       width="800"
       title="词条场景"
-      :disabled="sceneImages.length===0"
     >
       <!-- 场景提示器 -->
-      <scene-hinter :scene-images="sceneImages"></scene-hinter>
+      <scene-hinter v-if="sceneImages.length" :scene-images="sceneImages"></scene-hinter>
+      <p v-else>暂未提供场景</p>
       <el-row class="translate-wrapper" slot="reference">
         <!-- 左列只读基础文本 -->
         <el-col :span="12" class="center-middle">
