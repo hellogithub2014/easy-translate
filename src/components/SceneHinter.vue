@@ -5,7 +5,9 @@
   :autoplay="false"
   >
     <el-carousel-item v-for="imageUrl in sceneImages" :key="imageUrl">
-      <img :src="imageUrl" class="img" :width="imgWidth" :height="imgHeight">
+      <div v-viewer>
+        <img :src="imageUrl" class="img" :width="imgWidth" :height="imgHeight">
+      </div>
     </el-carousel-item>
   </el-carousel>
 </div>
@@ -30,6 +32,7 @@ export default {
       isEnlarged: false,
     };
   },
+  computed: {},
   methods: {},
 };
 </script>

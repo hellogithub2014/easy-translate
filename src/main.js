@@ -3,16 +3,19 @@
 import Vue from 'vue';
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import 'viewerjs/dist/viewer.css';
+import Viewer from 'v-viewer';
 import App from './App';
 import router from './router';
 import store from './store';
 
 const VueCookie = require('vue-cookie');
 
-// Tell Vue to use the plugin
+Vue.use(Viewer);
 Vue.use(VueCookie);
-Vue.config.productionTip = false;
 Vue.use(ElementUI); // TODO: 按需引入 http://element-cn.eleme.io/#/zh-CN/component/quickstart
+
+Vue.config.productionTip = false;
 
 /* eslint-disable no-new */
 new Vue({
