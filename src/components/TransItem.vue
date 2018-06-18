@@ -68,7 +68,6 @@
       :visible.sync="showSceneUpdateDialog">
       <scene-uploader ref="sceneUploader" :init-images="sceneForUploader"></scene-uploader>
       <div slot="footer" class="dialog-footer">
-        <!-- TODO: 为处理修改了场景，然后直接点击叉叉， 只有在点击确定按钮时才更新词条场景，并使用ref清除。 -->
         <el-button @click="showSceneUpdateDialog = false">取 消</el-button>
         <el-button type="primary" @click="updateTransItemScene">确 定</el-button>
       </div>

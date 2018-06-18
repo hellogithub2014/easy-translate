@@ -42,6 +42,7 @@
             <span>{{image.name || `图片${index+1}` }}</span> -
             <span>{{image.size | formatSize}}</span> -
             <a href="javascript:;" size="mini" type="success" @click="previewImage(index)">预览</a>
+            <i class="el-icon-close" @click="deleteImage(index)"></i>
           </li>
         </ul>
       </el-col>
@@ -159,7 +160,7 @@ export default {
       }
 
       // items不是Array对象，无法直接用forEach迭代
-      [...items].forEach((item) => {
+      [...items].forEach(item => {
         const { kind, type } = item;
         if (kind === 'file' && this.imageTypes.includes(type)) {
           // 手动调用api上传，成功后再把对象push
@@ -175,13 +176,13 @@ export default {
       const options = {
         ...this.defaultUploadOptions,
         file: imgFile,
-        onProgress: (res) => {
+        onProgress: res => {
           this.defaultUploadOptions.onProgress(res);
           this.uploadingImageFromPaste = {
             percentage: res.percent,
           };
         },
-        onSuccess: (res) => {
+        onSuccess: res => {
           this.defaultUploadOptions.onSuccess(res);
           this.uploadingImageFromPaste = null;
           this.imagesFromPaste.push({
@@ -226,6 +227,23 @@ export default {
       this.imagesFromPaste = [];
       this.imagesFromSelectOrDrag = [];
       this.$refs.elUpload.clearFiles();
+    },
+    /**
+     * 删除图片。
+     * 由于所有的粘贴板图片都在el-upload长传的图片之前，所以根据索引就能知道
+     * 待删除的图片属于粘贴板还是el-upload
+     */
+    deleteImage(index) {
+      const { imagesFromPaste, imagesFromSelectOrDrag } = this;
+      const pasteLength = imagesFromPaste.length;
+
+      if (index < pasteLength) {
+        imagesFromPaste.splice(index, 1);
+      } else {
+        imagesFromSelectOrDrag.splice(index - pasteLength, 1);
+      }
+
+      this.sceneUpdated();
     },
   },
 };
