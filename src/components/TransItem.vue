@@ -15,6 +15,7 @@
           :content="escapeHint">
           <el-button  size="mini" slot="reference">遇到<strong>{}</strong>报错？</el-button>
         </el-popover>
+        <el-button @click="tryDeleteTransItem" size="mini" icon="el-icon-delete"></el-button>
       </el-col>
     </el-row>
 
@@ -45,6 +46,22 @@
         </el-col>
       </el-row>
     </el-popover>
+
+    <!--  -->
+      <el-dialog
+        width="30%"
+        title="确认删除"
+        :visible.sync="showDeleteEntryDialog">
+        <div>
+          是否确认删除？如果删除的词条线上环境仍在使用，可能会导致线上报错。
+        </div>
+        <!-- 底部按钮 -->
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="showDeleteEntryDialog = false">取 消</el-button>
+          <el-button type="primary" @click="confirmDeleteEntry">确 定</el-button>
+        </div>
+      </el-dialog>
+
   </div>
 </template>
 
@@ -89,6 +106,7 @@ export default {
   data() {
     return {
       showEscapeHint: false,
+      showDeleteEntryDialog: false,
       mousePositionStart: 1,
       mousePositionEnd: 1,
     };
@@ -162,6 +180,13 @@ export default {
       const { startOffset, endOffset } = selection.getRangeAt(0);
       this.mousePositionStart = startOffset;
       this.mousePositionEnd = endOffset;
+    },
+    tryDeleteTransItem() {
+      this.showDeleteEntryDialog = true;
+    },
+    confirmDeleteEntry() {
+      this.showDeleteEntryDialog = false;
+      this.$emit('delete');
     },
   },
 };

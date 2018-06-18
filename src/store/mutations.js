@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import TYPES from './mutation-types';
 
 export default {
@@ -30,5 +31,10 @@ export default {
   },
   [TYPES.UPDATE_MODE](state, mode) {
     state.mode = mode;
+  },
+  [TYPES.DELETE_ENTRY](state, { path }) {
+    Object.keys(state.messages).forEach((key) => {
+      Vue.delete(state.messages[key], path);
+    });
   },
 };

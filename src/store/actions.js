@@ -36,4 +36,8 @@ export default {
       });
     });
   },
+  [TYPES.DELETE_ENTRY]({ commit }, { path }) {
+    // TODO: 需要发送请求删除所有语言的path词条
+    commit(TYPES.DELETE_ENTRY, { path });
+  },
 };

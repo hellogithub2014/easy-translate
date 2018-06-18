@@ -3,8 +3,7 @@
     <el-row :gutter="20">
       <el-col :span="10">
         <span>{{fromLocale}}</span>
-        ===
-        <i class="el-icon-d-arrow-right"></i>
+        ===>
         <el-select :value="toLocale"  @change="updateToLocale" filterable placeholder="请选择">
           <!-- 禁用与来源相同的语言？ -->
           <el-option

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-input placeholder="请输入内容" v-model="searchKey" @change="search" @keyup.enter="search">
+    <el-input placeholder="请输入内容" :value="searchKey" @change="updateAndSearch">
       <template slot="append">
         <el-button @click="search">搜索</el-button>
       </template>
@@ -14,13 +14,14 @@
       :scene-images="transItem.scene"
       :key="index"
       @update-plural-text="updatePluralText(index,$event)"
+      @delete="deleteItem(transItem.path)"
       ></trans-item>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
 import TransItem from './TransItem';
 import formatParser from '../utils/format-parser';
 import TYPES from '../store/mutation-types';
@@ -35,7 +36,7 @@ export default {
     return {
       pluralRecordCache: {}, // 记录每一个单复数词条被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
       searchKey: '',
-      pathList: [],
+      cachedPathList: [],
     };
   },
   computed: {
@@ -44,6 +45,17 @@ export default {
       toLocale: 'toLocale',
     }),
     ...mapGetters(['textPathList', 'getTextByPath', 'getTextScene']),
+    pathList: {
+      get() {
+        if (this.searchKey) {
+          return this.cachedPathList;
+        }
+        return this.textPathList(this.fromLocale); // 以左侧的源文本为准。
+      },
+      set(newPathList) {
+        this.cachedPathList = newPathList;
+      },
+    },
     originTransItems() {
       return this.pathList.map((path) => {
         const fromText = this.getTextByPath(this.fromLocale, path);
@@ -76,20 +88,11 @@ export default {
       return results;
     },
   },
-  watch: {
-    fromLocale() {
-      this.search();
-    },
-    toLocale() {
-      this.search();
-    },
-  },
-  mounted() {
-    // 以左侧的源文本为准。
-    this.pathList = this.textPathList(this.fromLocale);
-  },
   methods: {
     ...mapMutations({
+      deleteText: TYPES.DELETE_ENTRY,
+    }),
+    ...mapActions({
       updateText: TYPES.UPDATE_TEXT,
     }),
     updatePluralRecordCache(originTransItem, startRecordIndex) {
@@ -153,6 +156,12 @@ export default {
         toolsOfToText: formatParser.parseTranslateTools(newText),
       });
     },
+
+    updateAndSearch(newSearchKey) {
+      this.searchKey = newSearchKey;
+      this.search();
+    },
+
     search() {
       // TODO: 使用后端搜索，入参fromLocale、toLocale、searchKey, 返回path列表
       setTimeout(() => {
@@ -163,6 +172,9 @@ export default {
           return fromText.includes(this.searchKey) || toText.includes(this.searchKey);
         });
       }, 1000);
+    },
+    deleteItem(path) {
+      this.deleteText({ path });
     },
   },
 };
