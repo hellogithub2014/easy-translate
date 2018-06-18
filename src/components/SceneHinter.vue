@@ -4,7 +4,7 @@
   indicator-position="outside"
   :autoplay="false"
   >
-    <el-carousel-item v-for="imageUrl in sceneImages" :key="imageUrl">
+    <el-carousel-item v-for="(imageUrl,index) in sceneImages" :key="index">
       <div v-viewer>
         <img :src="imageUrl" class="img" :width="imgWidth" :height="imgHeight">
       </div>

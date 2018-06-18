@@ -29,7 +29,7 @@
         </el-col>
       </el-row>
 
-      <scene-uploader></scene-uploader>
+      <scene-uploader ref="sceneUploader" @change="addTextScene"></scene-uploader>
 
       <!-- 内层的二次确认弹窗 -->
       <el-dialog
@@ -82,6 +82,7 @@ export default {
         },
       ],
       allNoneExistPaths: [],
+      scene: [],
     };
   },
   computed: {
@@ -101,10 +102,9 @@ export default {
       this.doBathcAddEntry();
     },
     doBathcAddEntry() {
-      const { targetLocale: locale, entryList } = this;
+      const { entryList, scene } = this;
 
-      // TODO: 1.发送请求成功后再增加词条、清空表单
-      this.bacthAddEntry({ locale, entryList });
+      this.bacthAddEntry({ entryList, scene: scene.map(image => image.response.url) });
 
       this.entryList = [
         {
@@ -112,6 +112,7 @@ export default {
           text: '',
         },
       ];
+      this.clearTextScene();
       this.showDialog = false;
       this.$message.success('成功增加词条');
     },
@@ -143,6 +144,16 @@ export default {
     doubleConfirm() {
       this.showDoubleCheckDialog = false;
       this.doBathcAddEntry();
+    },
+    addTextScene(sceneImages) {
+      // TODO 添加场景
+      this.scene = sceneImages;
+    },
+    /**
+     * 清除场景图片
+     */
+    clearTextScene() {
+      this.$refs.sceneUploader.clearAllImages();
     },
   },
 };

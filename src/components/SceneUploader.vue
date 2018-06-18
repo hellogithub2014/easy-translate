@@ -13,6 +13,7 @@
           <el-upload
             drag
             multiple
+            ref="elUpload"
             :name="fileName"
             :accept="joinedImageTypes"
             :with-credentials="true"
@@ -129,6 +130,9 @@ export default {
     },
   },
   methods: {
+    sceneUpdated() {
+      this.$emit('change', this.allImages);
+    },
     finishLoadingPreviewImage() {
       this.imagePreviewCache = {
         ...this.imagePreviewCache,
@@ -176,6 +180,7 @@ export default {
             name: imgFile.name,
             size: imgFile.size,
           });
+          this.sceneUpdated();
         },
       };
       ajaxUpload(options);
@@ -198,10 +203,20 @@ export default {
     selectOrDragFileSuccess(response, file, fileList) {
       this.uploadingImagesSelectOrDrag = [];
       this.imagesFromSelectOrDrag = [...fileList];
+      this.sceneUpdated();
     },
 
+    /**
+     * 获取在拖拽、文件选择器上传图片时，处于上传中的图片列表
+     */
     getUploadingFiles(event, file, fileList) {
       this.uploadingImagesSelectOrDrag = fileList.filter(item => item.percentage !== 100);
+    },
+
+    clearAllImages() {
+      this.imagesFromPaste = [];
+      this.imagesFromSelectOrDrag = [];
+      this.$refs.elUpload.clearFiles();
     },
   },
 };

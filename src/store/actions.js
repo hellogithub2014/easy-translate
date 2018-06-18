@@ -24,13 +24,14 @@ export default {
    * @param {any} { commit }
    * @param {any} { locale, entryList }
    */
-  [TYPES.BATCH_ADD_ENTRY]({ state, commit, getters }, { entryList }) {
+  [TYPES.BATCH_ADD_ENTRY]({ state, commit, getters }, { entryList, scene }) {
     // 每种语言中默认也塞入同样的内容
     getters.validToLocaleList.forEach((lo) => {
       if (!state.messages[lo]) {
         return; // 目标语言的词条还没有获取到本地
       }
-      entryList.forEach(({ path, text, scene }) => {
+      // 一批词条使用同一个场景列表
+      entryList.forEach(({ path, text }) => {
         commit(TYPES.ADD_ENTRY, { locale: lo, path, text, scene });
       });
     });
