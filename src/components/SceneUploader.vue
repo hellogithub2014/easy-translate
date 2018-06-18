@@ -39,8 +39,8 @@
       <el-col :span="16">
         <ul v-if="allImages.length">
           <li v-for="(image, index) in allImages" :key="index" class="img-item">
-            <span>{{image.name}}</span> -
-            <span>{{image.size | formatSize}}</span>
+            <span>{{image.name || `图片${index+1}` }}</span> -
+            <span>{{image.size | formatSize}}</span> -
             <a href="javascript:;" size="mini" type="success" @click="previewImage(index)">预览</a>
           </li>
         </ul>
@@ -64,9 +64,15 @@ import ajaxUpload from '../utils/upload';
 
 export default {
   name: 'scene-uploader',
+  props: {
+    initImages: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
-      imagesFromPaste: [], // 所有从粘贴板已上传完成的图片
+      imagesFromPaste: [...this.initImages], // 所有从粘贴板已上传完成的图片,prop传入的图片默认塞到这里
       imagesFromSelectOrDrag: [], // 所有拖拽或选择的已上传完成的图片
       uploadingImageFromPaste: null, // 粘贴板中正在上传的图片，一次只能弄一个图片，故此属性用对象即可
       uploadingImagesSelectOrDrag: [], // 拖拽或选择的正在上传的图片数组，均可以一次上传多个，需要用数组
@@ -122,6 +128,9 @@ export default {
      * 字节转为kb
      */
     formatSize(size) {
+      if (!size) {
+        return 'xxkb';
+      }
       const parsedSize = parseInt(size, 10);
       return `${(parsedSize / 1024).toFixed(2)}kb`;
     },

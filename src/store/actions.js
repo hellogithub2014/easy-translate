@@ -40,4 +40,8 @@ export default {
     // TODO: 需要发送请求删除所有语言的path词条
     commit(TYPES.DELETE_ENTRY, { path });
   },
+  [TYPES.UPDATE_TEXT_SCENE]({ commit }, { path, scene }) {
+    // TODO: 需要发送请求更新场景
+    commit(TYPES.UPDATE_TEXT_SCENE, { path, scene });
+  },
 };

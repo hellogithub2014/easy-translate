@@ -33,8 +33,14 @@ export default {
     state.mode = mode;
   },
   [TYPES.DELETE_ENTRY](state, { path }) {
-    Object.keys(state.messages).forEach((key) => {
-      Vue.delete(state.messages[key], path);
+    Object.keys(state.messages).forEach((locale) => {
+      Vue.delete(state.messages[locale], path);
+    });
+  },
+  [TYPES.UPDATE_TEXT_SCENE](state, { path, scene }) {
+    Object.keys(state.messages).forEach((locale) => {
+      const message = state.messages[locale];
+      message[path].scene = scene;
     });
   },
 };
