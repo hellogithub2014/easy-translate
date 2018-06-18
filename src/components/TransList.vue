@@ -1,5 +1,11 @@
 <template>
   <div>
+    <el-input placeholder="请输入内容" v-model="searchKey" @change="search" @keyup.enter="search">
+      <template slot="append">
+        <el-button @click="search">搜索</el-button>
+      </template>
+    </el-input>
+
     <trans-item v-for='(transItem,index) in splitedTransItems'
       :path="transItem.path"
       :tools-of-from-text="transItem.toolsOfFromText"
@@ -28,6 +34,8 @@ export default {
   data() {
     return {
       pluralRecordCache: {}, // 记录每一个单复数词条被分散到整个transItems中的哪些索引,它负责保证分散到的位置是连续的，并且zero对应的是索引最小的那个
+      searchKey: '',
+      pathList: [],
     };
   },
   computed: {
@@ -36,9 +44,6 @@ export default {
       toLocale: 'toLocale',
     }),
     ...mapGetters(['textPathList', 'getTextByPath', 'getTextScene']),
-    pathList() {
-      return this.textPathList(this.fromLocale); // 以左侧的源文本为准
-    },
     originTransItems() {
       return this.pathList.map((path) => {
         const fromText = this.getTextByPath(this.fromLocale, path);
@@ -70,6 +75,18 @@ export default {
       });
       return results;
     },
+  },
+  watch: {
+    fromLocale() {
+      this.search();
+    },
+    toLocale() {
+      this.search();
+    },
+  },
+  mounted() {
+    // 以左侧的源文本为准。
+    this.pathList = this.textPathList(this.fromLocale);
   },
   methods: {
     ...mapMutations({
@@ -135,6 +152,17 @@ export default {
         ...targetTransItem,
         toolsOfToText: formatParser.parseTranslateTools(newText),
       });
+    },
+    search() {
+      // TODO: 使用后端搜索，入参fromLocale、toLocale、searchKey, 返回path列表
+      setTimeout(() => {
+        this.pathList = this.textPathList(this.fromLocale).filter((path) => {
+          const fromText = this.getTextByPath(this.fromLocale, path);
+          const toText = this.getTextByPath(this.toLocale, path);
+
+          return fromText.includes(this.searchKey) || toText.includes(this.searchKey);
+        });
+      }, 1000);
     },
   },
 };
